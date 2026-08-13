@@ -55,6 +55,22 @@ export async function deleteTracker (
   return { ok: error === null, error};
 }
 
+export async function fetchSubscriberCounts(trackerIds: string[]): Promise<Map<string, number>> {
+  if (trackerIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from('tracker_subscriber_counts')
+    .select('tracker_id, subscriber_count')
+    .in('tracker_id', trackerIds);
+
+  if (error) {
+    console.error('Failed to fetch subscriber counts: ', error);
+    return new Map();
+  }
+
+  return new Map(data.map((row) => [row.tracker_id, row.subscriber_count]));
+}
+
 export async function unsubscribeTracker (
   session: Session,
   tracker_id: string
