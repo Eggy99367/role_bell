@@ -118,6 +118,14 @@ async function markNotified(id: string, env: Env) {
 	});
 }
 
+async function logCheck(trackerId: string, httpStatus: number, matched: boolean, env: Env) {
+	await fetch(`${env.SUPABASE_URL}/rest/v1/check_logs`, {
+		method: 'POST',
+		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json' },
+		body: JSON.stringify({ tracker_id: trackerId, http_status: httpStatus, match: matched }),
+	});
+}
+
 export async function conditionsMet(html: string, keywords: string[], selectors: string[]): Promise<boolean> {
 	if (keywords.some((keyword) => html.includes(keyword))) return true;
 	if (selectors.length === 0) return false;
@@ -141,6 +149,7 @@ async function checkTracker(tracker: Tracker, env: Env) {
 		const res = await fetch(tracker.target_url);
 		const html = await res.text();
 		const matched = await conditionsMet(html, tracker.target_keyword ?? [], tracker.target_selector ?? []);
+		await logCheck(tracker.id, res.status, matched, env);
 		if (matched) {
 			await markMatched(tracker.id, env);
 			await sendNotificationMails(tracker, env);
