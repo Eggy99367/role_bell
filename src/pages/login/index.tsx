@@ -25,8 +25,6 @@ export default function Login() {
       email: formData.email,
       password: formData.password,
     })
-    console.log(`data: ${JSON.stringify(data)}`)
-    console.log(`error: ${error}`)
 
     if (error == null) {
       navigate('/trending');

@@ -20,6 +20,11 @@ type Tracker = {
 	target_keyword: string[] | null;
 };
 
+type Receiver = {
+	user_id: string;
+	email: string;
+}
+
 function supabaseHeaders(env: Env) {
 	return {
 		apikey: env.SUPABASE_SERVICE_ROLE_KEY,
@@ -44,6 +49,16 @@ async function fetchTrackerById(id: string, env: Env): Promise<Tracker | null> {
 	if (!res.ok) throw new Error(`failed to fetch tracker ${id}: ${res.status}`);
 	const rows: Tracker[] = await res.json();
 	return rows[0] ?? null;
+}
+
+async function fetchSubscriptionsByTrackerId(id: string, env: Env): Promise<Receiver[]> {
+	const res = await fetch(
+		`${env.SUPABASE_URL}/rest/v1/subscriptions?tracker_id=eq.${id}&select=user_id,email`,
+		{ headers: supabaseHeaders(env) }
+	);
+	if (!res.ok) throw new Error(`failed to fetch subscriptions ${id}: ${res.status}`);
+	const rows: Receiver[] = await res.json();
+	return rows;
 }
 
 async function markMatched(id: string, env: Env) {
