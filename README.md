@@ -30,11 +30,21 @@ And because many people usually wait on the same posting, every tracker can be *
 
 | | Feature | Description |
 |---|---|---|
-| 🔔 | **Create a Bell** | Paste a job page URL, define match conditions (CSS selectors and/or keywords), and save the tracker. A compatibility check verifies the page can be fetched and parsed before saving. |
+| 🔔 | **Create a Bell** | Paste a job page URL, define match conditions (CSS selectors and/or keywords), and save the tracker. A compatibility check verifies the page can be fetched and parsed before saving, and an inline **?** popover documents exactly which CSS selectors the matcher (HTMLRewriter) supports. |
+| 👀 | **Condition preview** | Hover any bell card to see its tracked conditions — every keyword and CSS selector — without opening anything. |
 | ⏱️ | **Scheduled detection** | A Cloudflare Worker cron sweeps all `WAITING` trackers, fetches each page, and evaluates the match conditions. Every check is logged with its HTTP status and result. |
 | 📧 | **Email notifications** | On a match, all subscribers get a notification email (batched through Resend) and the tracker is marked complete — no duplicate alerts. |
 | 🌐 | **Community sharing** | Trackers can be public. Anyone can subscribe to an existing tracker without re-configuring the URL and conditions. |
 | 🔥 | **Trending** | A ranked view of the most-subscribed public trackers, so you can discover which openings people are watching right now. |
+
+## 📸 Screenshots
+
+| | |
+|---|---|
+| ![Landing](public/landing.png) | ![Create a Bell](public/create_bell.png) |
+| *Landing — automated job watch* | *Create a Bell — conditions with selector-rules help* |
+| ![My Bells](public/my_bells.png) | ![Trending](public/trending.png) |
+| *My Bells — hover a card to preview its conditions* | *Trending — top public bells, subscribe in one click* |
 
 ## 🏗️ Architecture
 
