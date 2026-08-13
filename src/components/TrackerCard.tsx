@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type Tracker = {
   id: string;
@@ -7,22 +7,24 @@ export type Tracker = {
   target_url: string;
   status: string;
   creator_id: string;
+  is_public: boolean;
+  subscriber_count: number;
 };
 
-const STATUS_STYLES: Record<string, string> = {
-  WAITING: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20',
-  MATCHED: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20',
-};
+function statusLabel(status: string) {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
 
-function StatusBadge({ status }: { status: string }) {
-  const label = status.charAt(0) + status.slice(1).toLowerCase();
+function statusStripClass(status: string) {
+  if (status === 'WAITING') return 'bg-amber-400';
+  if (status === 'MATCHED') return 'bg-emerald-500';
+  return 'bg-red-500';
+}
+
+function PublicBadge() {
   return (
-    <span
-      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-        STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-500/20'
-      }`}
-    >
-      {label}
+    <span className="shrink-0 rounded-full bg-[#f4f1fa] px-2.5 py-1 text-xs font-medium text-[#6b52a6] ring-1 ring-inset ring-[#6b52a6]/20">
+      Public
     </span>
   );
 }
@@ -47,22 +49,60 @@ function ExternalLinkIcon() {
   );
 }
 
+function EyeIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 export default function TrackerCard({
   tracker,
   isOwner,
   isSubscribed,
   onToggleSubscribe,
+  onDelete,
+  showPublicBadge = true,
 }: {
   tracker: Tracker;
   isOwner: boolean;
   isSubscribed: boolean;
-  onToggleSubscribe: () => Promise<void>;
+  onToggleSubscribe: () => Promise<boolean>;
+  onDelete?: () => Promise<void>;
+  showPublicBadge?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
+  const [subscriberCount, setSubscriberCount] = useState(tracker.subscriber_count);
+
+  useEffect(() => {
+    setSubscriberCount(tracker.subscriber_count);
+  }, [tracker.subscriber_count]);
 
   const handleToggle = async () => {
+    const delta = isSubscribed ? -1 : 1;
+    setSubscriberCount((count) => count + delta);
     setLoading(true);
-    await onToggleSubscribe();
+    const ok = await onToggleSubscribe();
+    setLoading(false);
+    if (!ok) setSubscriberCount((count) => count - delta);
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete || !window.confirm(`Delete "${tracker.title}"? This can't be undone.`)) return;
+    setLoading(true);
+    await onDelete();
     setLoading(false);
   };
 
@@ -73,7 +113,7 @@ export default function TrackerCard({
           <h4 className="truncate text-lg">{tracker.title}</h4>
           <p className="truncate text-sm" style={{ color: '#8a76b8' }}>{tracker.company}</p>
         </div>
-        <StatusBadge status={tracker.status} />
+        {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
       </div>
 
       <a
@@ -86,16 +126,46 @@ export default function TrackerCard({
         <ExternalLinkIcon />
       </a>
 
-      {!isOwner && (
-        <button
-          type="button"
-          onClick={handleToggle}
-          disabled={loading}
-          className={`mt-auto ${isSubscribed ? 'border border-[#6b52a6] bg-white text-[#6b52a6] hover:bg-[#f4f1fa]' : ''}`}
-        >
-          {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-        </button>
-      )}
+      <div className="mt-auto flex items-center gap-3">
+        {isOwner
+          ? !tracker.is_public && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={loading}
+                className="border border-red-600 bg-white text-red-600 hover:bg-red-50"
+              >
+                {loading ? '...' : 'Delete'}
+              </button>
+            )
+          : (
+              <button
+                type="button"
+                onClick={handleToggle}
+                disabled={loading}
+                className={isSubscribed ? 'border border-[#6b52a6] bg-white text-[#6b52a6] hover:bg-[#f4f1fa]' : ''}
+              >
+                {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            )}
+
+        {tracker.is_public && (
+          <span
+            className="ml-auto flex items-center gap-1 text-sm text-gray-500"
+            title={`${subscriberCount} subscriber${subscriberCount === 1 ? '' : 's'}`}
+          >
+            <EyeIcon />
+            {subscriberCount}
+          </span>
+        )}
+      </div>
+
+      <div
+        className={`-mx-5 -mb-5 h-2 rounded-b-xl ${statusStripClass(tracker.status)}`}
+        role="img"
+        aria-label={`Status: ${statusLabel(tracker.status)}`}
+        title={statusLabel(tracker.status)}
+      />
     </div>
   );
 }
