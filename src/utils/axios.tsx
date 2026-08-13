@@ -14,3 +14,13 @@ export async function verifyWebContent(url: string): Promise<{ ok: boolean, cont
     return {ok: false, content: ""};
   }
 }
+
+export async function triggerCheck(trackerId: string): Promise<void> {
+  try {
+    await axios.get(`${WORKER_URL}/check`, { params: { id: trackerId } });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error(`Trigger check error: ${err.message}`);
+    }
+  }
+}

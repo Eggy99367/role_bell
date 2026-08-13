@@ -1,5 +1,5 @@
 import RequireAuth from '@/components/RequireAuth'
-import { verifyWebContent } from '@/utils/axios'
+import { verifyWebContent, triggerCheck } from '@/utils/axios'
 import { createTracker } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthContext';
 import { useState } from 'react'
@@ -63,6 +63,7 @@ export default function CreateTracker() {
     setFetchResult("");
     setConditions([]);
     setFormData({ targetURL: "", company: "", jobTitle: "", isPublic: false });
+    if (id) triggerCheck(id);
   }
 
   return (

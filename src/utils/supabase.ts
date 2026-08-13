@@ -24,10 +24,19 @@ export async function createTracker (
 
   if (!data || error) return {ok: false, error}
 
-  await supabase.from('subscriptions').insert({
+  const { error: subscribeError } = await subscribeTracker(session, data.id);
+
+  return { ok: subscribeError === null, error: subscribeError, id: data.id as string };
+}
+
+export async function subscribeTracker (
+  session: Session,
+  tracker_id: string
+) {
+  const { error } = await supabase.from('subscriptions').insert({
     user_id: session.user.id,
-    tracker_id: data.id
+    tracker_id
   })
 
-  return { ok: error === null, error, id: data.id as string };
+  return { ok: error === null, error};
 }
