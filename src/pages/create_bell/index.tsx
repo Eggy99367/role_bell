@@ -97,7 +97,7 @@ export default function CreateBell() {
           }}
           disabled={loading || verified}
         />
-        <button onClick={handleVerify} disabled={loading || verified}>Verify URL</button>
+        <button onClick={handleVerify} disabled={loading || verified || !formData.company.trim() || !formData.jobTitle.trim() || !formData.targetURL.trim()}>Verify URL</button>
         {failed && <p>Fetch failed! The URL may be incorrect or the webpage could not be retrieved.</p>}
         {verified && <div className='flex flex-col gap-3'>
           <p>Fetch successful! Please copy the fetched results into an <a href="https://html.onlineviewer.net/" target='blank'>Online HTML Viewer</a> to double-check that the output is correct.</p>

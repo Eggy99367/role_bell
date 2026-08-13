@@ -12,8 +12,8 @@ export default function Navbar() {
         <div className="flex items-center gap-12">
           <div className="flex items-center gap-12">
             <Link to="/trending">Trending</Link>
-            <Link to="/my_tracker">My Tracker</Link>
-            <Link to="/create_tracker">Create Tracker</Link>
+            <Link to="/my_bells">My Bells</Link>
+            <Link to="/create_bell">Create Bell</Link>
           </div>
           <div className="flex items-center gap-3">
             <span>{session.user.email}</span>
