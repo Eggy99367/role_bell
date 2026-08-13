@@ -43,6 +43,18 @@ export async function subscribeTracker (
   return { ok: error === null, error};
 }
 
+export async function deleteTracker (
+  session: Session,
+  tracker_id: string
+) {
+  const { error } = await supabase.from('trackers')
+    .delete()
+    .eq('id', tracker_id)
+    .eq('creator_id', session.user.id)
+
+  return { ok: error === null, error};
+}
+
 export async function unsubscribeTracker (
   session: Session,
   tracker_id: string
