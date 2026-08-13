@@ -1,16 +1,23 @@
 import RequireAuth from '@/components/RequireAuth'
 import { verifyWebContent } from '@/utils/axios'
+import { createTracker } from '@/utils/supabase';
+import { useAuth } from '@/utils/AuthContext';
 import { useState } from 'react'
 
 export default function CreateTracker() {
+  const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [targetURL, setTargetURL] = useState("");
   const [fetchResult, setFetchResult] = useState("");
   const [isCopied, setIsCopied] = useState(false);
   const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>([{id: crypto.randomUUID(), type: "text", value: ""}]);
-  const [isPublic, setIsPublic] = useState(false);
+  const [formData, setFormData] = useState({ targetURL: "", company: "", jobTitle: "", isPublic: false });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, type, value, checked } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  }
 
   const addCondition = (type: 'text' | 'css') => {
     setConditions(prev => [...prev, { id: crypto.randomUUID(), type, value: '' }]);
@@ -26,7 +33,7 @@ export default function CreateTracker() {
 
   const handleVerify = async () => {
     setLoading(true);
-    const { ok, content } = await verifyWebContent(targetURL);
+    const { ok, content } = await verifyWebContent(formData.targetURL);
     setVerified(ok);
     setFailed(!ok);
     setFetchResult(content);
@@ -43,15 +50,39 @@ export default function CreateTracker() {
     }
   };
 
+  const handleCreate = async () => {
+    if (!session) return;
+    const { ok, error } = await createTracker(session, conditions, formData);
+    if (!ok) console.error("Failed to create tracker: ", error);
+  }
+
   return (
     <RequireAuth>
       <div className='flex flex-col gap-3'>
         <h1>Create Tracker</h1>
         <input
+          type="text"
+          name="company"
+          placeholder="enter company"
+          value={formData.company}
+          onChange={handleChange}
+          disabled={loading || verified}
+        />
+        <input
+          type="text"
+          name="jobTitle"
+          placeholder="enter job title"
+          value={formData.jobTitle}
+          onChange={handleChange}
+          disabled={loading || verified}
+        />
+        <input
           type="url"
+          name="targetURL"
           placeholder="enter target page's url"
+          value={formData.targetURL}
           onChange={(event) => {
-            setTargetURL(event.target.value);
+            handleChange(event);
             setFailed(false);
           }}
           disabled={loading || verified}
@@ -95,12 +126,13 @@ export default function CreateTracker() {
           <label className='flex items-center gap-2'>
             <input
               type="checkbox"
-              checked={isPublic}
-              onChange={(event) => setIsPublic(event.target.checked)}
+              name="isPublic"
+              checked={formData.isPublic}
+              onChange={handleChange}
             />
             Make Public
           </label>
-          <button disabled={!conditions.some(c => c.value.trim() !== '')}>Create</button>
+          <button disabled={!conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
         </div>}
       </div>
     </RequireAuth>
