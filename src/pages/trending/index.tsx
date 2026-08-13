@@ -66,7 +66,7 @@ export default function Trending() {
       <div className='flex flex-col gap-10'>
         <h1 className='text-[#f1eefa]'>Trending</h1>
         <section className='flex flex-col gap-4'>
-          <h3 className='text-[#f1eefa]'>top 50 public bells</h3>
+          <h3 className='text-[#f1eefa]'>Top 50 Public Bells</h3>
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {trending.map(t => (
               <TrackerCard

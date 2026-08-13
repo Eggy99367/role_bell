@@ -72,7 +72,7 @@ export default function CreateBell() {
   return (
     <RequireAuth>
       <div className='flex flex-col gap-3 max-w-xl'>
-        <h1 className='text-[#f1eefa]'>Create Bell</h1>
+        <h1 className='text-[#f1eefa]'>Create A Bell</h1>
         <input
           type="text"
           name="company"
