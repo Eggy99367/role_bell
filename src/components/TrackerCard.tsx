@@ -10,6 +10,8 @@ export type Tracker = {
   is_public: boolean;
   subscriber_count: number;
   created_at: string;
+  target_selector: string[] | null;
+  target_keyword: string[] | null;
 };
 
 function statusLabel(status: string) {
@@ -111,8 +113,26 @@ export default function TrackerCard({
     setLoading(false);
   };
 
+  const keywords = tracker.target_keyword ?? [];
+  const selectors = tracker.target_selector ?? [];
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-shadow hover:border-violet-500/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_16px_32px_-12px_rgba(124,58,237,0.35)]">
+    <div className="group relative flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-shadow hover:border-violet-500/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_16px_32px_-12px_rgba(124,58,237,0.35)]">
+      {(keywords.length > 0 || selectors.length > 0) && (
+        <div className="pointer-events-none absolute inset-x-2 bottom-full z-10 mb-2 hidden flex-col gap-1.5 rounded-xl border border-line bg-surface p-3 shadow-lg group-hover:flex">
+          <p className="text-xs font-medium text-[#f1eefa]">Tracked conditions</p>
+          {keywords.map((keyword) => (
+            <p key={keyword} className="break-all text-xs text-[#9a8fb8]">
+              <span className="text-violet-300">Text</span> {keyword}
+            </p>
+          ))}
+          {selectors.map((selector) => (
+            <p key={selector} className="break-all text-xs text-[#9a8fb8]">
+              <span className="text-violet-300">CSS</span> {selector}
+            </p>
+          ))}
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h4 className="truncate text-lg text-[#f1eefa]">{tracker.title}</h4>
