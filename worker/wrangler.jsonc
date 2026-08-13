@@ -19,7 +19,7 @@
 	},
 	"vars": {
 		"SUPABASE_URL": "https://bvjeplnhnduqclongbzg.supabase.co",
-		"RESEND_FROM_EMAIL": "onboarding@resend.dev"
+		"RESEND_FROM_EMAIL": "noreply@yhchen.com"
 	}
 	/**
 	 * Smart Placement

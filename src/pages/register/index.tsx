@@ -51,7 +51,6 @@ export default function Register() {
           <p>Email:</p>
           <input
             type="email" 
-            pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" 
             name="email"
             placeholder="enter email"
             onChange={handleChange}

@@ -4,7 +4,7 @@ import { createTracker } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthContext';
 import { useState } from 'react'
 
-export default function CreateTracker() {
+export default function CreateBell() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -54,7 +54,7 @@ export default function CreateTracker() {
     if (!session) return;
     const { ok, error, id } = await createTracker(session, conditions, formData);
     if (!ok) {
-      console.error("Failed to create tracker: ", error);
+      console.error("Failed to create bell: ", error);
       return;
     }
     setLoading(false);
@@ -69,7 +69,7 @@ export default function CreateTracker() {
   return (
     <RequireAuth>
       <div className='flex flex-col gap-3'>
-        <h1>Create Tracker</h1>
+        <h1>Create Bell</h1>
         <input
           type="text"
           name="company"

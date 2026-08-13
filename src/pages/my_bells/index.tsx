@@ -19,7 +19,7 @@ export default function MyTracker() {
       .select(TRACKER_FIELDS)
       .eq('creator_id', session.user.id)
       .then(({ data, error }) => {
-        if (error) return console.error('Failed to fetch own trackers: ', error);
+        if (error) return console.error('Failed to fetch own bells: ', error);
         setOwnTrackers(data as unknown as Tracker[]);
       });
 
@@ -28,7 +28,7 @@ export default function MyTracker() {
       .select(`trackers(${TRACKER_FIELDS})`)
       .eq('user_id', session.user.id)
       .then(({ data, error }) => {
-        if (error) return console.error('Failed to fetch subscribed trackers: ', error);
+        if (error) return console.error('Failed to fetch subscribed bells: ', error);
         setSubscribedTrackers(data.map((row) => row.trackers).filter(Boolean) as unknown as Tracker[]);
       });
   }, [session])
@@ -42,7 +42,7 @@ export default function MyTracker() {
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>
-        <h1>My Trackers</h1>
+        <h1>My Bells</h1>
 
         <section className='flex flex-col gap-4'>
           <h3>Created by me</h3>
