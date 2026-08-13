@@ -1,8 +1,8 @@
 import RequireAuth from '@/components/RequireAuth'
 import { useAuth } from '@/utils/AuthContext';
-import { supabase } from '@/utils/supabase';
+import { deleteTracker, supabase } from '@/utils/supabase';
 import { useEffect, useState } from 'react';
-import { type Tracker } from '@/components/TrackerCard';
+import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 
 
 const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public';
@@ -27,11 +27,31 @@ export default function Trending() {
       });
   }, [session])
 
+  const handleDelete = async (trackerId: string) => {
+    if (!session) return;
+    const { ok } = await deleteTracker(session, trackerId);
+    if (ok) setTrending((prev) => prev.filter((t) => t.id !== trackerId));
+  };
 
   return (
     <RequireAuth>
-      <div>
+      <div className='flex flex-col gap-10'>
         <h1>Trending</h1>
+        <section className='flex flex-col gap-4'>
+          <h3>top 50 public bells</h3>
+          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+            {trending.map(t => (
+              <TrackerCard
+                key={t.id}
+                tracker={t}
+                isOwner
+                isSubscribed
+                onToggleSubscribe={async () => { }}
+                onDelete={() => handleDelete(t.id)}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </RequireAuth>
   )
