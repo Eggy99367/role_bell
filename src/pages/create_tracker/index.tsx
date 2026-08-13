@@ -52,8 +52,17 @@ export default function CreateTracker() {
 
   const handleCreate = async () => {
     if (!session) return;
-    const { ok, error } = await createTracker(session, conditions, formData);
-    if (!ok) console.error("Failed to create tracker: ", error);
+    const { ok, error, id } = await createTracker(session, conditions, formData);
+    if (!ok) {
+      console.error("Failed to create tracker: ", error);
+      return;
+    }
+    setLoading(false);
+    setVerified(false);
+    setFailed(false);
+    setFetchResult("");
+    setConditions([]);
+    setFormData({ targetURL: "", company: "", jobTitle: "", isPublic: false });
   }
 
   return (

@@ -11,15 +11,23 @@ export async function createTracker (
     conditions: { id: string, type: 'text' | 'css', value: string }[],
     formData: {targetURL: string, company: string, jobTitle: string, isPublic: boolean}
   ) {
-  const { error } = await supabase.from('trackers').insert({
+  const { data, error } = await supabase.from('trackers').insert({
     company: formData.company,
     title: formData.jobTitle,
     target_url: formData.targetURL,
-    target_selector: conditions.filter((element) => element.type === "css" && element.value !== "").map((element) => element.value),
-    target_keyword: conditions.filter((element) => element.type === "text" && element.value !== "").map((element) => element.value),
+    target_selector: conditions.filter((element) => element.type === "css" && element.value.trim() !== "").map((element) => element.value),
+    target_keyword: conditions.filter((element) => element.type === "text" && element.value.trim() !== "").map((element) => element.value),
     status: "WAITING",
     is_public: formData.isPublic,
     creator_id: session.user.id
-  });
-  return { ok: error === null, error };
+  }).select('id').single();
+
+  if (!data || error) return {ok: false, error}
+
+  await supabase.from('subscriptions').insert({
+    user_id: session.user.id,
+    tracker_id: data.id
+  })
+
+  return { ok: error === null, error, id: data.id as string };
 }
