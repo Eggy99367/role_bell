@@ -8,6 +8,7 @@ export default function CreateBell() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [message, setMessage] = useState("");
   const [failed, setFailed] = useState(false);
   const [fetchResult, setFetchResult] = useState("");
   const [isCopied, setIsCopied] = useState(false);
@@ -57,6 +58,8 @@ export default function CreateBell() {
       console.error("Failed to create bell: ", error);
       return;
     }
+    setMessage("Bell Created Successfully!");
+    setTimeout(() => setMessage(""), 4000);
     setLoading(false);
     setVerified(false);
     setFailed(false);
@@ -140,10 +143,11 @@ export default function CreateBell() {
               checked={formData.isPublic}
               onChange={handleChange}
             />
-            Make Public
+            Make Public <b>PUBLIC BELL CAN NOT BE DELETED!</b>
           </label>
           <button disabled={!conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
         </div>}
+        <p className='text-green-700'>{message}</p>
       </div>
     </RequireAuth>
   )
