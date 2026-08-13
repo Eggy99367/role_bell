@@ -21,9 +21,9 @@ function formatCreatedAt(createdAt: string) {
 }
 
 function statusStripClass(status: string) {
-  if (status === 'WAITING') return 'bg-amber-400';
-  if (status === 'MATCHED') return 'bg-emerald-500';
-  return 'bg-red-500';
+  if (status === 'WAITING') return 'bg-amber-700';
+  if (status === 'MATCHED') return 'bg-emerald-700';
+  return 'bg-red-700';
 }
 
 function PublicBadge() {
@@ -167,11 +167,10 @@ export default function TrackerCard({
       </div>
 
       <div
-        className={`-mx-5 -mb-5 h-2 rounded-b-xl ${statusStripClass(tracker.status)}`}
-        role="img"
-        aria-label={`Status: ${statusLabel(tracker.status)}`}
-        title={statusLabel(tracker.status)}
-      />
+        className={`-mx-5 -mb-5 flex h-7 items-center justify-center rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
+      >
+        {statusLabel(tracker.status)}
+      </div>
     </div>
   );
 }
