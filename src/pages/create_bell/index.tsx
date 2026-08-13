@@ -4,6 +4,21 @@ import { createTracker } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthContext';
 import { useState } from 'react'
 
+const CSS_SELECTOR_RULES = `Supported selectors (Cloudflare HTMLRewriter):
+- tag, *, .class, #id
+- [attr], [attr="value"], [attr^=], [attr$=], [attr*=], [attr~=], [attr|=]
+- descendant (A B) and child (A > B) combinators
+- :nth-child(n), :first-child, :nth-of-type(n), :first-of-type, :not(...)
+
+NOT supported:
+- :has(), :is(), :where()
+- :last-child, :nth-last-child()
+- sibling combinators (+, ~)
+- :hover and other dynamic pseudo-classes
+
+Tip: to detect "more than 6 items", use
+ul.my-list > li:nth-child(7)`;
+
 export default function CreateBell() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -116,7 +131,17 @@ export default function CreateBell() {
             .map(condition => (
               <div key={condition.id} className='flex flex-col gap-2 border border-line bg-surface p-3 rounded-xl'>
                 <div className='flex justify-between items-center'>
-                  <h3 className='text-[#f1eefa]'>{condition.type === 'text' ? 'Track Text' : 'Track CSS Selecter'}</h3>
+                  <h3 className='text-[#f1eefa] flex items-center gap-2'>
+                    {condition.type === 'text' ? 'Track Text' : 'Track CSS Selecter'}
+                    {condition.type === 'css' && (
+                      <span className='relative group' tabIndex={0}>
+                        <span className='text-xs text-[#9a8fb8] border border-line rounded-full w-4 h-4 inline-flex items-center justify-center cursor-help'>?</span>
+                        <pre className='hidden group-hover:block group-focus:block absolute left-0 top-6 z-10 w-80 whitespace-pre-wrap border border-line bg-surface text-[#9a8fb8] text-xs font-sans p-3 rounded-xl shadow-lg'>
+                          {CSS_SELECTOR_RULES}
+                        </pre>
+                      </span>
+                    )}
+                  </h3>
                   <button onClick={() => removeCondition(condition.id)} className='border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50'>Delete</button>
                 </div>
                 {condition.type === 'text' ? (
