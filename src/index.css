@@ -93,14 +93,14 @@ button:disabled {
 }
 
 
-input {
+input, textarea {
   padding: 5px 10px;
   width: 100%;
   border-radius: 5px;
   border: 2px solid black;
 }
 
-input:disabled {
+input:disabled, textarea:disabled {
   background-color: #e8e8e8;
   color: #888;
   cursor: not-allowed;
