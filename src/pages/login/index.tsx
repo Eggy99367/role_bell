@@ -35,20 +35,20 @@ export default function Login() {
   }
 
   return (
-    <div className="flex-1 flex justify-center items-center">
-      <div className="p-10 w-fit border flex flex-col items-cente gap-3">
-        <h3 className="mb-3">Login</h3>
+    <div className="flex-1 flex justify-center items-center px-4">
+      <div className="p-8 sm:p-10 w-full max-w-sm rounded-xl border border-line bg-surface flex flex-col items-stretch gap-3">
+        <h3 className="mb-3 text-center text-[#f1eefa]">Login</h3>
         <div>
-          <p>Email:</p>
+          <p className="text-sm text-[#9a8fb8]">Email:</p>
           <input
-            type="email" 
+            type="email"
             name="email"
             placeholder="enter email"
             onChange={handleChange}
           />
         </div>
         <div>
-          <p>Password:</p>
+          <p className="text-sm text-[#9a8fb8]">Password:</p>
           <input
             type="password"
             name="password"
@@ -56,9 +56,9 @@ export default function Login() {
             onChange={handleChange}
           />
         </div>
-        <Link className="text-center" to="/register">Create an account</Link>
+        <Link className="text-center text-sm" to="/register">Create an account</Link>
         <button onClick={handleLogin}>Log In</button>
-        <p className="text-red-600 text-center">{err}</p>
+        <p className="text-red-400 text-center text-sm">{err}</p>
       </div>
     </div>
   )

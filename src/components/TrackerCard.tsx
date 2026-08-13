@@ -21,14 +21,14 @@ function formatCreatedAt(createdAt: string) {
 }
 
 function statusStripClass(status: string) {
-  if (status === 'WAITING') return 'bg-amber-700';
-  if (status === 'MATCHED') return 'bg-emerald-700';
-  return 'bg-red-700';
+  if (status === 'WAITING') return 'bg-amber-600';
+  if (status === 'MATCHED') return 'bg-emerald-600';
+  return 'bg-red-600/90';
 }
 
 function PublicBadge() {
   return (
-    <span className="shrink-0 rounded-full bg-[#f4f1fa] px-2.5 py-1 text-xs font-medium text-[#6b52a6] ring-1 ring-inset ring-[#6b52a6]/20">
+    <span className="shrink-0 rounded-full bg-violet-500/15 px-2.5 py-1 text-xs font-medium text-violet-300 ring-1 ring-inset ring-violet-400/30">
       Public
     </span>
   );
@@ -112,12 +112,12 @@ export default function TrackerCard({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-black/10 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.15)] transition-shadow hover:shadow-[0_1px_2px_rgba(0,0,0,0.04),0_16px_32px_-12px_rgba(0,0,0,0.2)]">
+    <div className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-shadow hover:border-violet-500/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_16px_32px_-12px_rgba(124,58,237,0.35)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="truncate text-lg">{tracker.title}</h4>
-          <p className="truncate text-sm" style={{ color: '#8a76b8' }}>{tracker.company}</p>
-          <p className="text-xs text-gray-400">Created {formatCreatedAt(tracker.created_at)}</p>
+          <h4 className="truncate text-lg text-[#f1eefa]">{tracker.title}</h4>
+          <p className="truncate text-sm text-violet-300">{tracker.company}</p>
+          <p className="text-xs text-[#6b6480]">Created {formatCreatedAt(tracker.created_at)}</p>
         </div>
         {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
       </div>
@@ -126,7 +126,7 @@ export default function TrackerCard({
         href={tracker.target_url}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex w-fit items-center gap-1.5 text-sm text-[#6b52a6] no-underline hover:text-[#5b2bca]"
+        className="inline-flex w-fit items-center gap-1.5 text-sm text-violet-300 no-underline hover:text-violet-200"
       >
         View posting
         <ExternalLinkIcon />
@@ -139,17 +139,17 @@ export default function TrackerCard({
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="border border-red-600 bg-white text-red-600 hover:bg-red-50"
+                className="border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50"
               >
                 {loading ? '...' : 'Delete'}
               </button>
             )
-          : (
+          : tracker.status !== 'MATCHED' && (
               <button
                 type="button"
                 onClick={handleToggle}
                 disabled={loading}
-                className={isSubscribed ? 'border border-[#6b52a6] bg-white text-[#6b52a6] hover:bg-[#f4f1fa]' : ''}
+                className={isSubscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
               >
                 {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
               </button>
@@ -157,7 +157,7 @@ export default function TrackerCard({
 
         {tracker.is_public && (
           <span
-            className="ml-auto flex items-center gap-1 text-sm text-gray-500"
+            className="ml-auto flex items-center gap-1 text-sm text-[#9a8fb8]"
             title={`${subscriberCount} subscriber${subscriberCount === 1 ? '' : 's'}`}
           >
             <EyeIcon />
@@ -167,8 +167,9 @@ export default function TrackerCard({
       </div>
 
       <div
-        className={`-mx-5 -mb-5 flex h-7 items-center justify-center rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
+        className={`-mx-5 -mb-5 flex h-7 items-center justify-center gap-1.5 rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
       >
+        {tracker.status === 'WAITING' && <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulsering" />}
         {statusLabel(tracker.status)}
       </div>
     </div>

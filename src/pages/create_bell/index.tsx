@@ -71,8 +71,8 @@ export default function CreateBell() {
 
   return (
     <RequireAuth>
-      <div className='flex flex-col gap-3'>
-        <h1>Create Bell</h1>
+      <div className='flex flex-col gap-3 max-w-xl'>
+        <h1 className='text-[#f1eefa]'>Create Bell</h1>
         <input
           type="text"
           name="company"
@@ -101,12 +101,12 @@ export default function CreateBell() {
           disabled={loading || verified}
         />
         <button onClick={handleVerify} disabled={loading || verified || !formData.company.trim() || !formData.jobTitle.trim() || !formData.targetURL.trim()}>Verify URL</button>
-        {failed && <p>Fetch failed! The URL may be incorrect or the webpage could not be retrieved.</p>}
+        {failed && <p className='text-red-400'>Fetch failed! The URL may be incorrect or the webpage could not be retrieved.</p>}
         {verified && <div className='flex flex-col gap-3'>
-          <p>Fetch successful! Please copy the fetched results into an <a href="https://html.onlineviewer.net/" target='blank'>Online HTML Viewer</a> to double-check that the output is correct.</p>
+          <p className='text-[#9a8fb8]'>Fetch successful! Please copy the fetched results into an <a href="https://html.onlineviewer.net/" target='blank'>Online HTML Viewer</a> to double-check that the output is correct.</p>
           <button onClick={handleCopy} disabled={!verified}>{isCopied ? "Copied" : "Copy Fetch Result"}</button>
-          <h2>Tracked Conditions</h2>
-          <p>You'll be notified if any condition is met.</p>
+          <h2 className='text-[#f1eefa]'>Tracked Conditions</h2>
+          <p className='text-[#9a8fb8]'>You'll be notified if any condition is met.</p>
           <div className='flex gap-3'>
             <button onClick={() => addCondition('text')}>Add Text</button>
             <button onClick={() => addCondition('css')}>Add CSS Selecter</button>
@@ -114,10 +114,10 @@ export default function CreateBell() {
           {[...conditions]
             .sort((a, b) => (a.type === b.type ? 0 : a.type === 'text' ? -1 : 1))
             .map(condition => (
-              <div key={condition.id} className='flex flex-col gap-2 border p-3 rounded'>
+              <div key={condition.id} className='flex flex-col gap-2 border border-line bg-surface p-3 rounded-xl'>
                 <div className='flex justify-between items-center'>
-                  <h3>{condition.type === 'text' ? 'Track Text' : 'Track CSS Selecter'}</h3>
-                  <button onClick={() => removeCondition(condition.id)}>Delete</button>
+                  <h3 className='text-[#f1eefa]'>{condition.type === 'text' ? 'Track Text' : 'Track CSS Selecter'}</h3>
+                  <button onClick={() => removeCondition(condition.id)} className='border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50'>Delete</button>
                 </div>
                 {condition.type === 'text' ? (
                   <input
@@ -136,18 +136,19 @@ export default function CreateBell() {
               </div>
             ))}
 
-          <label className='flex items-center gap-2'>
+          <label className='flex items-center gap-2 text-[#9a8fb8]'>
             <input
               type="checkbox"
               name="isPublic"
               checked={formData.isPublic}
               onChange={handleChange}
+              className='accent-violet-500'
             />
-            Make Public <b>PUBLIC BELL CAN NOT BE DELETED!</b>
+            Make Public <b className='text-[#f1eefa]'>PUBLIC BELL CAN NOT BE DELETED!</b>
           </label>
           <button disabled={!conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
         </div>}
-        <p className='text-green-700'>{message}</p>
+        <p className='text-emerald-400'>{message}</p>
       </div>
     </RequireAuth>
   )

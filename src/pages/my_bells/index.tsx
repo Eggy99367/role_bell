@@ -57,11 +57,11 @@ export default function MyTracker() {
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>
-        <h1>My Bells</h1>
+        <h1 className='text-[#f1eefa]'>My Bells</h1>
 
         <section className='flex flex-col gap-4'>
-          <h3>Created by me</h3>
-          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+          <h3 className='text-[#f1eefa]'>Created by me</h3>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {ownTrackers.map(t => (
               <TrackerCard
                 key={t.id}
@@ -76,8 +76,8 @@ export default function MyTracker() {
         </section>
 
         <section className='flex flex-col gap-4'>
-          <h3>Subscribed by me</h3>
-          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+          <h3 className='text-[#f1eefa]'>Subscribed by me</h3>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {subscribedTrackers.map(t => (
               <TrackerCard
                 key={t.id}

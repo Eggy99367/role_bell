@@ -64,10 +64,10 @@ export default function Trending() {
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>
-        <h1>Trending</h1>
+        <h1 className='text-[#f1eefa]'>Trending</h1>
         <section className='flex flex-col gap-4'>
-          <h3>top 50 public bells</h3>
-          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+          <h3 className='text-[#f1eefa]'>top 50 public bells</h3>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {trending.map(t => (
               <TrackerCard
                 key={t.id}

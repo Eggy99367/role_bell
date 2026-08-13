@@ -7,10 +7,6 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-/* 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,28 +22,47 @@
   padding: 0;
   min-width: 100%;
   min-height: 100%;
-  /* text-align: center; */
 }
 
+::selection {
+  background: #7c3aed;
+  color: #f5f3ff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0a14;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2440;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3459;
+}
 
 a {
   font-weight: 500;
-  color: #636bfa;
+  color: #a78bfa;
   text-decoration: inherit;
 }
 a:hover {
-  color: #353eed;
+  color: #c4b5fd;
 }
 
 body {
   margin: 0;
   display: flex;
-  /* place-items: center; */
   min-width: 100vw;
   min-height: 100vh;
+  background-color: #0b0a14;
+  color: #f1eefa;
 }
 
-h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); }
+h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: var(--font-heading-weight); letter-spacing: -0.01em; }
 
 h1 {
   font-size: 3.2em;
@@ -77,43 +92,60 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #6b52a6;
+  background-color: #7c3aed;
   color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
-button:hover {
-  background-color: #5b2bca;
+button:hover:not(:disabled) {
+  background-color: #8b5cf6;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
 }
 
 button:disabled {
-  background-color: #a9a9a9;
+  background-color: #2a2440;
+  color: #6b6480;
   cursor: not-allowed;
 }
 
 
 input:not([type="checkbox"]):not([type="radio"]), textarea {
-  padding: 5px 10px;
+  padding: 7px 12px;
   width: 100%;
-  border-radius: 5px;
-  border: 2px solid black;
+  border-radius: 8px;
+  border: 1px solid #2a2440;
+  background-color: #151221;
+  color: #f1eefa;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #6b6480;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
 }
 
 input:disabled, textarea:disabled {
-  background-color: #e8e8e8;
-  color: #888;
+  background-color: #15122180;
+  color: #6b6480;
   cursor: not-allowed;
 }
-/* @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
+}

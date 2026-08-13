@@ -44,20 +44,20 @@ export default function Register() {
 
 
   return (
-    <div className="flex-1 flex justify-center items-center">
-      <div className="p-10 w-fit border flex flex-col items-cente gap-3">
-        <h3 className="mb-3">Register</h3>
+    <div className="flex-1 flex justify-center items-center px-4">
+      <div className="p-8 sm:p-10 w-full max-w-sm rounded-xl border border-line bg-surface flex flex-col items-stretch gap-3">
+        <h3 className="mb-3 text-center text-[#f1eefa]">Register</h3>
         <div>
-          <p>Email:</p>
+          <p className="text-sm text-[#9a8fb8]">Email:</p>
           <input
-            type="email" 
+            type="email"
             name="email"
             placeholder="enter email"
             onChange={handleChange}
           />
         </div>
         <div>
-          <p>Create Password:</p>
+          <p className="text-sm text-[#9a8fb8]">Create Password:</p>
           <input
             type="password"
             name="password"
@@ -66,7 +66,7 @@ export default function Register() {
           />
         </div>
         <div>
-          <p>Re-enter Password:</p>
+          <p className="text-sm text-[#9a8fb8]">Re-enter Password:</p>
           <input
             type="password"
             name="retype"
@@ -74,9 +74,9 @@ export default function Register() {
             onChange={handleChange}
           />
         </div>
-        <Link className="text-center" to="/login">Already have an account? Log In</Link>
+        <Link className="text-center text-sm" to="/login">Already have an account? Log In</Link>
         <button onClick={handleRegister}>Register</button>
-        <p className="text-red-600 text-center">{err}</p>
+        <p className="text-red-400 text-center text-sm">{err}</p>
       </div>
     </div>
   )
