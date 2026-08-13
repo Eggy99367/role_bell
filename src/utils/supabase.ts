@@ -33,6 +33,10 @@ export async function subscribeTracker (
   session: Session,
   tracker_id: string
 ) {
+  console.log(session.user.id);
+  console.log(session.user.email);
+  console.log(tracker_id);
+
   const { error } = await supabase.from('subscriptions').insert({
     user_id: session.user.id,
     email: session.user.email,
