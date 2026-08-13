@@ -91,7 +91,7 @@ async function sendNotificationMails(tracker: Tracker, env: Env) {
 		},
 		body: JSON.stringify(
 			receivers.map((receiver) => ({
-				from: env.RESEND_FROM_EMAIL,
+				from: `Rolebell <${env.RESEND_FROM_EMAIL}>`,
 				to: receiver.email,
 				subject: `${tracker.company} - ${tracker.title} has an update`,
 				html,
@@ -99,7 +99,7 @@ async function sendNotificationMails(tracker: Tracker, env: Env) {
 		),
 	});
 	if (!res.ok) console.error(`failed to send notification mails for tracker ${tracker.id}: ${res.status}`);
-	else markNotified(tracker.id, env);
+	else await markNotified(tracker.id, env);
 }
 
 async function markMatched(id: string, env: Env) {
