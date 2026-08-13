@@ -4,7 +4,7 @@ import { useAuth } from '@/utils/AuthContext'
 import { supabase, unsubscribeTracker, deleteTracker, fetchSubscriberCounts } from '@/utils/supabase';
 import { useEffect, useState } from 'react'
 
-const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public';
+const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,created_at';
 
 type RawTracker = Omit<Tracker, 'subscriber_count'>;
 

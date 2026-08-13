@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 
 
-const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public';
+const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,created_at';
 
 export default function Trending() {
   const [trending, setTrending] = useState<Tracker[]>([]);

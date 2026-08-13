@@ -9,10 +9,15 @@ export type Tracker = {
   creator_id: string;
   is_public: boolean;
   subscriber_count: number;
+  created_at: string;
 };
 
 function statusLabel(status: string) {
   return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
+function formatCreatedAt(createdAt: string) {
+  return new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function statusStripClass(status: string) {
@@ -112,6 +117,7 @@ export default function TrackerCard({
         <div className="min-w-0">
           <h4 className="truncate text-lg">{tracker.title}</h4>
           <p className="truncate text-sm" style={{ color: '#8a76b8' }}>{tracker.company}</p>
+          <p className="text-xs text-gray-400">Created {formatCreatedAt(tracker.created_at)}</p>
         </div>
         {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
       </div>
