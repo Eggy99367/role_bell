@@ -1,6 +1,6 @@
 import RequireAuth from '@/components/RequireAuth'
 import { useAuth } from '@/utils/AuthContext';
-import { deleteTracker, supabase } from '@/utils/supabase';
+import { deleteTracker, subscribeTracker, unsubscribeTracker, fetchSubscriberCounts, supabase } from '@/utils/supabase';
 import { useEffect, useState } from 'react';
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 
@@ -9,6 +9,7 @@ const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public'
 
 export default function Trending() {
   const [trending, setTrending] = useState<Tracker[]>([]);
+  const [subscribedIds, setSubscribedIds] = useState<Set<string>>(new Set());
   const { session } = useAuth();
 
   useEffect(() => {
@@ -16,14 +17,24 @@ export default function Trending() {
 
     supabase
       .from('trackers')
-      .select(`${TRACKER_FIELDS}, subscriptions(count)`)
+      .select(TRACKER_FIELDS)
       .eq('is_public', true)
-      .then(({ data, error }) => {
+      .limit(50)
+      .then(async ({ data, error }) => {
         if (error) return console.error('Failed to fetch trending bells: ', error);
-        const sorted = [...data].sort(
-          (a, b) => (b.subscriptions[0]?.count ?? 0) - (a.subscriptions[0]?.count ?? 0)
-        );
-        setTrending(sorted as unknown as Tracker[]);
+        const counts = await fetchSubscriberCounts(data.map((t) => t.id));
+        const withCounts = data.map((t) => ({ ...t, subscriber_count: counts.get(t.id) ?? 0 }));
+        withCounts.sort((a, b) => b.subscriber_count - a.subscriber_count);
+        setTrending(withCounts as unknown as Tracker[]);
+      });
+
+    supabase
+      .from('subscriptions')
+      .select('tracker_id')
+      .eq('user_id', session.user.id)
+      .then(({ data, error }) => {
+        if (error) return console.error('Failed to fetch subscribed ids: ', error);
+        setSubscribedIds(new Set(data.map((row) => row.tracker_id)));
       });
   }, [session])
 
@@ -31,6 +42,23 @@ export default function Trending() {
     if (!session) return;
     const { ok } = await deleteTracker(session, trackerId);
     if (ok) setTrending((prev) => prev.filter((t) => t.id !== trackerId));
+  };
+
+  const handleToggleSubscribe = async (trackerId: string): Promise<boolean> => {
+    if (!session) return false;
+    if (subscribedIds.has(trackerId)) {
+      const { ok } = await unsubscribeTracker(session, trackerId);
+      if (ok) setSubscribedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(trackerId);
+        return next;
+      });
+      return ok;
+    } else {
+      const { ok } = await subscribeTracker(session, trackerId);
+      if (ok) setSubscribedIds((prev) => new Set(prev).add(trackerId));
+      return ok;
+    }
   };
 
   return (
@@ -44,10 +72,11 @@ export default function Trending() {
               <TrackerCard
                 key={t.id}
                 tracker={t}
-                isOwner
-                isSubscribed
-                onToggleSubscribe={async () => { }}
+                isOwner={t.creator_id === session?.user.id}
+                isSubscribed={subscribedIds.has(t.id)}
+                onToggleSubscribe={() => handleToggleSubscribe(t.id)}
                 onDelete={() => handleDelete(t.id)}
+                showPublicBadge={false}
               />
             ))}
           </div>

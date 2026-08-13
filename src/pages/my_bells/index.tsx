@@ -41,10 +41,11 @@ export default function MyTracker() {
       });
   }, [session])
 
-  const handleUnsubscribe = async (trackerId: string) => {
-    if (!session) return;
+  const handleUnsubscribe = async (trackerId: string): Promise<boolean> => {
+    if (!session) return false;
     const { ok } = await unsubscribeTracker(session, trackerId);
     if (ok) setSubscribedTrackers((prev) => prev.filter((t) => t.id !== trackerId));
+    return ok;
   };
 
   const handleDelete = async (trackerId: string) => {
@@ -67,7 +68,7 @@ export default function MyTracker() {
                 tracker={t}
                 isOwner
                 isSubscribed
-                onToggleSubscribe={async () => {}}
+                onToggleSubscribe={async () => true}
                 onDelete={() => handleDelete(t.id)}
               />
             ))}
