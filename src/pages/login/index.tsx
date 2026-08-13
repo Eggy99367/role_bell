@@ -29,7 +29,7 @@ export default function Login() {
     console.log(`error: ${error}`)
 
     if (error == null) {
-      navigate('/');
+      navigate('/trending');
     }
     else {
       setErr(error.message);

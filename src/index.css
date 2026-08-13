@@ -87,6 +87,24 @@ button:hover {
   background-color: #5b2bca;
 }
 
+button:disabled {
+  background-color: #a9a9a9;
+  cursor: not-allowed;
+}
+
+
+input {
+  padding: 5px 10px;
+  width: 100%;
+  border-radius: 5px;
+  border: 2px solid black;
+}
+
+input:disabled {
+  background-color: #e8e8e8;
+  color: #888;
+  cursor: not-allowed;
+}
 /* @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

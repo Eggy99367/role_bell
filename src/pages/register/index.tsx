@@ -25,12 +25,13 @@ export default function Register() {
       return
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
+      options: {
+        emailRedirectTo: 'https://rolebell.yhchen.com/login',
+      },
     })
-    console.log(`data: ${JSON.stringify(data)}`)
-    console.log(`error: ${error}`)
 
     if (error == null) {
       navigate('/verify');
