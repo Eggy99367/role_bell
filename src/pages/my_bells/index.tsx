@@ -1,10 +1,12 @@
 import RequireAuth from '@/components/RequireAuth'
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 import { useAuth } from '@/utils/AuthContext'
-import { supabase, unsubscribeTracker, deleteTracker } from '@/utils/supabase';
+import { supabase, unsubscribeTracker, deleteTracker, fetchSubscriberCounts } from '@/utils/supabase';
 import { useEffect, useState } from 'react'
 
 const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public';
+
+type RawTracker = Omit<Tracker, 'subscriber_count'>;
 
 export default function MyTracker() {
   const [ownTrackers, setOwnTrackers] = useState<Tracker[]>([]);
@@ -18,18 +20,24 @@ export default function MyTracker() {
       .from('trackers')
       .select(TRACKER_FIELDS)
       .eq('creator_id', session.user.id)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) return console.error('Failed to fetch own bells: ', error);
-        setOwnTrackers(data as unknown as Tracker[]);
+        const counts = await fetchSubscriberCounts(data.map((t) => t.id));
+        setOwnTrackers(data.map((t) => ({ ...t, subscriber_count: counts.get(t.id) ?? 0 })) as unknown as Tracker[]);
       });
 
     supabase
       .from('subscriptions')
       .select(`trackers(${TRACKER_FIELDS})`)
       .eq('user_id', session.user.id)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) return console.error('Failed to fetch subscribed bells: ', error);
-        setSubscribedTrackers(data.map((row) => row.trackers).filter(Boolean) as unknown as Tracker[]);
+        const trackers = data
+          .map((row) => row.trackers as unknown as RawTracker)
+          .filter(Boolean)
+          .filter((t) => t.creator_id !== session.user.id);
+        const counts = await fetchSubscriberCounts(trackers.map((t) => t.id));
+        setSubscribedTrackers(trackers.map((t) => ({ ...t, subscriber_count: counts.get(t.id) ?? 0 })) as unknown as Tracker[]);
       });
   }, [session])
 
@@ -73,7 +81,7 @@ export default function MyTracker() {
               <TrackerCard
                 key={t.id}
                 tracker={t}
-                isOwner={t.creator_id === session?.user.id}
+                isOwner={false}
                 isSubscribed
                 onToggleSubscribe={() => handleUnsubscribe(t.id)}
               />
