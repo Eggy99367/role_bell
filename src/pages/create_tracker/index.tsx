@@ -9,7 +9,8 @@ export default function CreateTracker() {
   const [targetURL, setTargetURL] = useState("");
   const [fetchResult, setFetchResult] = useState("");
   const [isCopied, setIsCopied] = useState(false);
-  const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>([]);
+  const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>([{id: crypto.randomUUID(), type: "text", value: ""}]);
+  const [isPublic, setIsPublic] = useState(false);
 
   const addCondition = (type: 'text' | 'css') => {
     setConditions(prev => [...prev, { id: crypto.randomUUID(), type, value: '' }]);
@@ -90,6 +91,16 @@ export default function CreateTracker() {
                 )}
               </div>
             ))}
+
+          <label className='flex items-center gap-2'>
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(event) => setIsPublic(event.target.checked)}
+            />
+            Make Public
+          </label>
+          <button disabled={!conditions.some(c => c.value.trim() !== '')}>Create</button>
         </div>}
       </div>
     </RequireAuth>
