@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, useRoutes } from 'react-router-dom'
 import routes from '~react-pages'
 import Layout from './components/Layout.tsx'
+import { AuthProvider } from './utils/AuthContext.tsx'
 import './index.css'
 
 function App() {
@@ -12,7 +13,9 @@ function App() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
