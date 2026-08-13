@@ -18,7 +18,8 @@
 		"crons": ["* * * * *"]
 	},
 	"vars": {
-		"SUPABASE_URL": "https://bvjeplnhnduqclongbzg.supabase.co"
+		"SUPABASE_URL": "https://bvjeplnhnduqclongbzg.supabase.co",
+		"RESEND_FROM_EMAIL": "onboarding@resend.dev"
 	}
 	/**
 	 * Smart Placement
