@@ -1,4 +1,10 @@
 import RequireAuth from '@/components/RequireAuth'
+import TrackerCard, { type Tracker } from '@/components/TrackerCard';
+import { useAuth } from '@/utils/AuthContext'
+import { supabase, unsubscribeTracker } from '@/utils/supabase';
+import { useEffect, useState } from 'react'
+
+const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id';
 
 export default function MyTracker() {
   const [ownTrackers, setOwnTrackers] = useState<Tracker[]>([]);
@@ -35,8 +41,32 @@ export default function MyTracker() {
 
   return (
     <RequireAuth>
-      <div>
-        <h1>My Tracker</h1>
+      <div className='flex flex-col gap-10'>
+        <h1>My Trackers</h1>
+
+        <section className='flex flex-col gap-4'>
+          <h3>Created by me</h3>
+          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+            {ownTrackers.map(t => (
+              <TrackerCard key={t.id} tracker={t} isOwner isSubscribed onToggleSubscribe={async () => {}} />
+            ))}
+          </div>
+        </section>
+
+        <section className='flex flex-col gap-4'>
+          <h3>Subscribed by me</h3>
+          <div className='grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-5'>
+            {subscribedTrackers.map(t => (
+              <TrackerCard
+                key={t.id}
+                tracker={t}
+                isOwner={t.creator_id === session?.user.id}
+                isSubscribed
+                onToggleSubscribe={() => handleUnsubscribe(t.id)}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </RequireAuth>
   )

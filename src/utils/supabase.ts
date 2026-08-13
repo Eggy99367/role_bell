@@ -45,3 +45,15 @@ export async function subscribeTracker (
 
   return { ok: error === null, error};
 }
+
+export async function unsubscribeTracker (
+  session: Session,
+  tracker_id: string
+) {
+  const { error } = await supabase.from('subscriptions')
+    .delete()
+    .eq('user_id', session.user.id)
+    .eq('tracker_id', tracker_id)
+
+  return { ok: error === null, error};
+}
