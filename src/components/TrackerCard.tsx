@@ -1,6 +1,7 @@
 import { deleteTracker, subscribeTracker, unsubscribeTracker } from '@/utils/supabase';
 import { Session } from "@supabase/supabase-js"
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export type Tracker = {
   id: string;
@@ -84,6 +85,7 @@ export default function TrackerCard({
   const [subscribed, setSubscribed] = useState(isSubscribed)
   const [loading, setLoading] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(tracker.subscriber_count);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setSubscriberCount(tracker.subscriber_count);
@@ -98,7 +100,7 @@ export default function TrackerCard({
     const { ok } = subscribed
       ? await unsubscribeTracker(session, tracker.id)
       : await subscribeTracker(session, tracker.id);
-    
+
     if (ok) setSubscribed(!subscribed);
     else setSubscriberCount((count) => count - delta);
 
@@ -172,11 +174,11 @@ export default function TrackerCard({
             : tracker.status !== 'MATCHED' && (
               <button
                 type="button"
-                onClick={handleToggle}
+                onClick={session ? handleToggle : () => navigate('/login')}
                 disabled={loading}
                 className={subscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
               >
-                {loading ? '...' : subscribed ? 'Unsubscribe' : 'Subscribe'}
+                {session ? loading ? '...' : subscribed ? 'Unsubscribe' : 'Subscribe' : 'Log in to subscribe'}
               </button>
             )}
 
