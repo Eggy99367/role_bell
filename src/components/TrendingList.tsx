@@ -61,6 +61,9 @@ export default function TrendingList() {
           <option value={"MATCHED"}>Matched</option>
         </select>
       </div>
+      {trending.length === 0 && (
+        <p className="py-10 text-center text-lg text-[#6b6480]">No results</p>
+      )}
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
         {trending.map(t => (
           <TrackerCard
