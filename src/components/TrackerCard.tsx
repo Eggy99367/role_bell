@@ -9,6 +9,7 @@ export type Tracker = {
   creator_id: string;
   is_public: boolean;
   subscriber_count: number;
+  last_checked_at: string;
   created_at: string;
   target_selector: string[] | null;
   target_keyword: string[] | null;
@@ -56,21 +57,10 @@ function ExternalLinkIcon() {
   );
 }
 
-function EyeIcon() {
+function SubscriberIcon() {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
-      <circle cx="12" cy="12" r="3" />
+    <svg width="14px" height="14px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 18L14 18M17 15V21M4 21C4 17.134 7.13401 14 11 14C11.695 14 12.3663 14.1013 13 14.2899M15 7C15 9.20914 13.2091 11 11 11C8.79086 11 7 9.20914 7 7C7 4.79086 8.79086 3 11 3C13.2091 3 15 4.79086 15 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   );
 }
@@ -135,9 +125,9 @@ export default function TrackerCard({
       )}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="truncate text-lg text-[#f1eefa]">{tracker.title}</h4>
-          <p className="truncate text-sm text-violet-300">{tracker.company}</p>
-          <p className="text-xs text-[#6b6480]">Created {formatCreatedAt(tracker.created_at)}</p>
+          <h4 className="truncate text-lg text-[#f1eefa] text-left">{tracker.title}</h4>
+          <p className="truncate text-sm text-violet-300  text-left">{tracker.company}</p>
+          <p className="text-xs text-[#6b6480] text-left">{tracker.status !== "MATCHED" ? `Created ${formatCreatedAt(tracker.created_at)}` : `Fulfilled ${formatCreatedAt(tracker.last_checked_at)}`}</p>
         </div>
         {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
       </div>
@@ -155,32 +145,32 @@ export default function TrackerCard({
       <div className="mt-auto flex items-center gap-3">
         {isOwner
           ? !tracker.is_public && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={loading}
-                className="border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50"
-              >
-                {loading ? '...' : 'Delete'}
-              </button>
-            )
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={loading}
+              className="border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50"
+            >
+              {loading ? '...' : 'Delete'}
+            </button>
+          )
           : tracker.status !== 'MATCHED' && (
-              <button
-                type="button"
-                onClick={handleToggle}
-                disabled={loading}
-                className={isSubscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
-              >
-                {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={handleToggle}
+              disabled={loading}
+              className={isSubscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
+            >
+              {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+            </button>
+          )}
 
         {tracker.is_public && (
           <span
             className="ml-auto flex items-center gap-1 text-sm text-[#9a8fb8]"
             title={`${subscriberCount} subscriber${subscriberCount === 1 ? '' : 's'}`}
           >
-            <EyeIcon />
+            <SubscriberIcon />
             {subscriberCount}
           </span>
         )}
