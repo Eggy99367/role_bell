@@ -119,10 +119,17 @@ async function markNotified(id: string, env: Env) {
 }
 
 async function logCheck(trackerId: string, httpStatus: number, matched: boolean, env: Env) {
-	await fetch(`${env.SUPABASE_URL}/rest/v1/check_logs`, {
+	const res = await fetch(`${env.SUPABASE_URL}/rest/v1/check_logs?select=checked_at`, {
 		method: 'POST',
-		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json' },
+		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json', Prefer: 'return=representation' },
 		body: JSON.stringify({ tracker_id: trackerId, http_status: httpStatus, match: matched }),
+	});
+	if (!res.ok) return;
+	const [row]: { checked_at: string }[] = await res.json();
+	await fetch(`${env.SUPABASE_URL}/rest/v1/trackers?id=eq.${trackerId}`, {
+		method: 'PATCH',
+		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json' },
+		body: JSON.stringify({ last_checked_at: row.checked_at }),
 	});
 }
 

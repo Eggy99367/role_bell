@@ -1,5 +1,5 @@
 import { useAuth } from "@/utils/AuthContext";
-import { fetchSubscriberCounts, subscribeTracker, supabase, unsubscribeTracker } from "@/utils/supabase";
+import { fetchSubscriberCounts, supabase } from "@/utils/supabase";
 import { useEffect, useState } from "react";
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 
