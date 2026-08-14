@@ -1,14 +1,11 @@
-import RequireAuth from '@/components/RequireAuth'
-import { useAuth } from '@/utils/AuthContext';
-import { deleteTracker, subscribeTracker, unsubscribeTracker, fetchSubscriberCounts, supabase } from '@/utils/supabase';
-import { useEffect, useState } from 'react';
+import { useAuth } from "@/utils/AuthContext";
+import { deleteTracker, fetchSubscriberCounts, subscribeTracker, supabase, unsubscribeTracker } from "@/utils/supabase";
+import { useEffect, useState } from "react";
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
-import TrendingList from '@/components/TrendingList';
 
+const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,last_checked_at,created_at,target_selector,target_keyword';
 
-const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,created_at,target_selector,target_keyword';
-
-export default function Trending() {
+export default function TrendingList() {
   const [trending, setTrending] = useState<Tracker[]>([]);
   const [subscribedIds, setSubscribedIds] = useState<Set<string>>(new Set());
   const { session } = useAuth();
@@ -57,14 +54,18 @@ export default function Trending() {
   };
 
   return (
-    <RequireAuth>
-      <div className='flex flex-col gap-10'>
-        <h1 className='text-[#f1eefa]'>Trending</h1>
-        <section className='flex flex-col gap-4'>
-          <h3 className='text-[#f1eefa]'>Top 50 Public Bells</h3>
-          <TrendingList />
-        </section>
-      </div>
-    </RequireAuth>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
+      {trending.map(t => (
+        <TrackerCard
+          session={session}
+          key={t.id}
+          tracker={t}
+          isOwner={t.creator_id === session?.user.id}
+          isSubscribed={subscribedIds.has(t.id)}
+          onToggleSubscribe={() => handleToggleSubscribe(t.id)}
+          showPublicBadge={false}
+        />
+      ))}
+    </div>
   )
 }

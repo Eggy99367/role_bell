@@ -1,3 +1,5 @@
+import { deleteTracker } from '@/utils/supabase';
+import { Session } from "@supabase/supabase-js"
 import { useEffect, useState } from 'react';
 
 export type Tracker = {
@@ -66,20 +68,24 @@ function SubscriberIcon() {
 }
 
 export default function TrackerCard({
+  session,
   tracker,
   isOwner,
   isSubscribed,
   onToggleSubscribe,
-  onDelete,
+  // onDelete,
   showPublicBadge = true,
 }: {
+  session: Session | null;
   tracker: Tracker;
   isOwner: boolean;
   isSubscribed: boolean;
   onToggleSubscribe: () => Promise<boolean>;
-  onDelete?: () => Promise<void>;
+  // onDelete?: () => Promise<void>;
   showPublicBadge?: boolean;
 }) {
+  const [deleted, setDeleted] = useState(false);
+  const [subscribed, setSubscribed] = useState(isSubscribed)
   const [loading, setLoading] = useState(false);
   const [subscriberCount, setSubscriberCount] = useState(tracker.subscriber_count);
 
@@ -88,7 +94,7 @@ export default function TrackerCard({
   }, [tracker.subscriber_count]);
 
   const handleToggle = async () => {
-    const delta = isSubscribed ? -1 : 1;
+    const delta = subscribed ? -1 : 1;
     setSubscriberCount((count) => count + delta);
     setLoading(true);
     const ok = await onToggleSubscribe();
@@ -97,9 +103,12 @@ export default function TrackerCard({
   };
 
   const handleDelete = async () => {
-    if (!onDelete || !window.confirm(`Delete "${tracker.title}"? This can't be undone.`)) return;
+    if (!session || !window.confirm(`Delete "${tracker.title}"? This can't be undone.`)) return;
     setLoading(true);
-    await onDelete();
+    const { ok } = await deleteTracker(session, tracker.id);
+    if (ok) {
+      setDeleted(true);
+    }
     setLoading(false);
   };
 
@@ -107,81 +116,85 @@ export default function TrackerCard({
   const selectors = tracker.target_selector ?? [];
 
   return (
-    <div className="group relative flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-shadow hover:border-violet-500/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_16px_32px_-12px_rgba(124,58,237,0.35)]">
-      {(keywords.length > 0 || selectors.length > 0) && (
-        <div className="pointer-events-none absolute inset-x-2 bottom-full z-10 mb-2 hidden flex-col gap-1.5 rounded-xl border border-line bg-surface p-3 shadow-lg group-hover:flex">
-          <p className="text-xs font-medium text-[#f1eefa]">Tracked conditions</p>
-          {keywords.map((keyword) => (
-            <p key={keyword} className="break-all text-xs text-[#9a8fb8]">
-              <span className="text-violet-300">Text</span> {keyword}
-            </p>
-          ))}
-          {selectors.map((selector) => (
-            <p key={selector} className="break-all text-xs text-[#9a8fb8]">
-              <span className="text-violet-300">CSS</span> {selector}
-            </p>
-          ))}
-        </div>
-      )}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h4 className="truncate text-lg text-[#f1eefa] text-left">{tracker.title}</h4>
-          <p className="truncate text-sm text-violet-300  text-left">{tracker.company}</p>
-          <p className="text-xs text-[#6b6480] text-left">{tracker.status !== "MATCHED" ? `Created ${formatCreatedAt(tracker.created_at)}` : `Fulfilled ${formatCreatedAt(tracker.last_checked_at)}`}</p>
-        </div>
-        {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
-      </div>
-
-      <a
-        href={tracker.target_url}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex w-fit items-center gap-1.5 text-sm text-violet-300 no-underline hover:text-violet-200"
-      >
-        View posting
-        <ExternalLinkIcon />
-      </a>
-
-      <div className="mt-auto flex items-center gap-3">
-        {isOwner
-          ? !tracker.is_public && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={loading}
-              className="border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50"
-            >
-              {loading ? '...' : 'Delete'}
-            </button>
-          )
-          : tracker.status !== 'MATCHED' && (
-            <button
-              type="button"
-              onClick={handleToggle}
-              disabled={loading}
-              className={isSubscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
-            >
-              {loading ? '...' : isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-            </button>
-          )}
-
-        {tracker.is_public && (
-          <span
-            className="ml-auto flex items-center gap-1 text-sm text-[#9a8fb8]"
-            title={`${subscriberCount} subscriber${subscriberCount === 1 ? '' : 's'}`}
-          >
-            <SubscriberIcon />
-            {subscriberCount}
-          </span>
+    deleted ? (
+      <></>
+    ) : (
+      <div className="group relative flex flex-col gap-4 rounded-xl border border-line bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_-12px_rgba(0,0,0,0.6)] transition-shadow hover:border-violet-500/40 hover:shadow-[0_1px_2px_rgba(0,0,0,0.2),0_16px_32px_-12px_rgba(124,58,237,0.35)]">
+        {(keywords.length > 0 || selectors.length > 0) && (
+          <div className="pointer-events-none absolute inset-x-2 bottom-full z-10 mb-2 hidden flex-col gap-1.5 rounded-xl border border-line bg-surface p-3 shadow-lg group-hover:flex">
+            <p className="text-xs font-medium text-[#f1eefa]">Tracked conditions</p>
+            {keywords.map((keyword) => (
+              <p key={keyword} className="break-all text-xs text-[#9a8fb8]">
+                <span className="text-violet-300">Text</span> {keyword}
+              </p>
+            ))}
+            {selectors.map((selector) => (
+              <p key={selector} className="break-all text-xs text-[#9a8fb8]">
+                <span className="text-violet-300">CSS</span> {selector}
+              </p>
+            ))}
+          </div>
         )}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h4 className="truncate text-lg text-[#f1eefa] text-left">{tracker.title}</h4>
+            <p className="truncate text-sm text-violet-300  text-left">{tracker.company}</p>
+            <p className="text-xs text-[#6b6480] text-left">{tracker.status !== "MATCHED" ? `Created ${formatCreatedAt(tracker.created_at)}` : `Fulfilled ${formatCreatedAt(tracker.last_checked_at)}`}</p>
+          </div>
+          {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
+        </div>
+  
+        <a
+          href={tracker.target_url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex w-fit items-center gap-1.5 text-sm text-violet-300 no-underline hover:text-violet-200"
+        >
+          View posting
+          <ExternalLinkIcon />
+        </a>
+  
+        <div className="mt-auto flex items-center gap-3">
+          {isOwner
+            ? !tracker.is_public && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={loading}
+                className="border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50"
+              >
+                {loading ? '...' : 'Delete'}
+              </button>
+            )
+            : tracker.status !== 'MATCHED' && (
+              <button
+                type="button"
+                onClick={handleToggle}
+                disabled={loading}
+                className={subscribed ? 'border border-violet-500 bg-transparent text-violet-300 hover:bg-violet-500/10' : ''}
+              >
+                {loading ? '...' : subscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            )}
+  
+          {tracker.is_public && (
+            <span
+              className="ml-auto flex items-center gap-1 text-sm text-[#9a8fb8]"
+              title={`${subscriberCount} subscriber${subscriberCount === 1 ? '' : 's'}`}
+            >
+              <SubscriberIcon />
+              {subscriberCount}
+            </span>
+          )}
+        </div>
+  
+        <div
+          className={`-mx-5 -mb-5 flex h-7 items-center justify-center gap-1.5 rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
+        >
+          {tracker.status === 'WAITING' && <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulsering" />}
+          {statusLabel(tracker.status)}
+        </div>
       </div>
-
-      <div
-        className={`-mx-5 -mb-5 flex h-7 items-center justify-center gap-1.5 rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
-      >
-        {tracker.status === 'WAITING' && <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulsering" />}
-        {statusLabel(tracker.status)}
-      </div>
-    </div>
+    )
   );
 }

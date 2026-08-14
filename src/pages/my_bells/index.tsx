@@ -48,12 +48,6 @@ export default function MyTracker() {
     return ok;
   };
 
-  const handleDelete = async (trackerId: string) => {
-    if (!session) return;
-    const { ok } = await deleteTracker(session, trackerId);
-    if (ok) setOwnTrackers((prev) => prev.filter((t) => t.id !== trackerId));
-  };
-
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>
@@ -64,12 +58,13 @@ export default function MyTracker() {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {ownTrackers.map(t => (
               <TrackerCard
+                session={session}
                 key={t.id}
                 tracker={t}
                 isOwner
                 isSubscribed
                 onToggleSubscribe={async () => true}
-                onDelete={() => handleDelete(t.id)}
+                // onDelete={() => handleDelete(t.id)}
               />
             ))}
           </div>
@@ -80,6 +75,7 @@ export default function MyTracker() {
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
             {subscribedTrackers.map(t => (
               <TrackerCard
+                session={session}
                 key={t.id}
                 tracker={t}
                 isOwner={false}
