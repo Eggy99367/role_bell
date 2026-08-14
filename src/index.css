@@ -117,7 +117,7 @@ button:disabled {
 }
 
 
-input:not([type="checkbox"]):not([type="radio"]), textarea {
+input:not([type="checkbox"]):not([type="radio"]), textarea, select {
   padding: 7px 12px;
   width: 100%;
   border-radius: 8px;
@@ -126,17 +126,22 @@ input:not([type="checkbox"]):not([type="radio"]), textarea {
   color: #f1eefa;
 }
 
+select {
+  width: auto;
+  cursor: pointer;
+}
+
 input::placeholder, textarea::placeholder {
   color: #6b6480;
 }
 
-input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus {
+input:not([type="checkbox"]):not([type="radio"]):focus, textarea:focus, select:focus {
   outline: none;
   border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
 }
 
-input:disabled, textarea:disabled {
+input:disabled, textarea:disabled, select:disabled {
   background-color: #15122180;
   color: #6b6480;
   cursor: not-allowed;

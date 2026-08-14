@@ -4,12 +4,12 @@ import TrendingList from '@/components/TrendingList';
 export default function Trending() {
   return (
     <RequireAuth>
-      <div className='flex flex-col gap-10'>
+      <div className='flex flex-col gap-2'>
         <h1 className='text-[#f1eefa]'>Trending</h1>
-        <section className='flex flex-col gap-4'>
+        <TrendingList />
+        {/* <section className='flex flex-col gap-4'>
           <h3 className='text-[#f1eefa]'>Top 50 Public Bells</h3>
-          <TrendingList />
-        </section>
+        </section> */}
       </div>
     </RequireAuth>
   )

@@ -36,8 +36,10 @@ export default function Home() {
         ))}
       </div>
 
-      <h1 className='text-[#f1eefa]'>Trending</h1>
-      <TrendingList />
+      <div className='flex flex-col items-center'>
+        <h1 className='text-[#f1eefa]'>Trending</h1>
+        <TrendingList />
+      </div>
     </div>
   )
 }
