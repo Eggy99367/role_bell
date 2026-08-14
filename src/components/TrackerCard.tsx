@@ -23,7 +23,8 @@ function statusLabel(status: string) {
 }
 
 function formatCreatedAt(createdAt: string) {
-  return new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  const utc = /Z$|[+-]\d{2}(:?\d{2})?$/.test(createdAt) ? createdAt : createdAt + 'Z';
+  return new Date(utc).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function statusStripClass(status: string) {
