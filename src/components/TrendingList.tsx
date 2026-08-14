@@ -1,5 +1,5 @@
 import { useAuth } from "@/utils/AuthContext";
-import { deleteTracker, fetchSubscriberCounts, subscribeTracker, supabase, unsubscribeTracker } from "@/utils/supabase";
+import { fetchSubscriberCounts, subscribeTracker, supabase, unsubscribeTracker } from "@/utils/supabase";
 import { useEffect, useState } from "react";
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 
@@ -11,8 +11,6 @@ export default function TrendingList() {
   const { session } = useAuth();
 
   useEffect(() => {
-    if (!session) return;
-
     supabase
       .from('trackers')
       .select(TRACKER_FIELDS)
@@ -26,6 +24,11 @@ export default function TrendingList() {
         setTrending(withCounts as unknown as Tracker[]);
       });
 
+    if (!session) {
+      setSubscribedIds(new Set());
+      return
+    }
+
     supabase
       .from('subscriptions')
       .select('tracker_id')
@@ -36,23 +39,6 @@ export default function TrendingList() {
       });
   }, [session])
 
-  const handleToggleSubscribe = async (trackerId: string): Promise<boolean> => {
-    if (!session) return false;
-    if (subscribedIds.has(trackerId)) {
-      const { ok } = await unsubscribeTracker(session, trackerId);
-      if (ok) setSubscribedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(trackerId);
-        return next;
-      });
-      return ok;
-    } else {
-      const { ok } = await subscribeTracker(session, trackerId);
-      if (ok) setSubscribedIds((prev) => new Set(prev).add(trackerId));
-      return ok;
-    }
-  };
-
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'>
       {trending.map(t => (
@@ -62,7 +48,6 @@ export default function TrendingList() {
           tracker={t}
           isOwner={t.creator_id === session?.user.id}
           isSubscribed={subscribedIds.has(t.id)}
-          onToggleSubscribe={() => handleToggleSubscribe(t.id)}
           showPublicBadge={false}
         />
       ))}

@@ -1,7 +1,7 @@
 import RequireAuth from '@/components/RequireAuth'
 import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 import { useAuth } from '@/utils/AuthContext'
-import { supabase, unsubscribeTracker, deleteTracker, fetchSubscriberCounts } from '@/utils/supabase';
+import { supabase, fetchSubscriberCounts } from '@/utils/supabase';
 import { useEffect, useState } from 'react'
 
 const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,created_at,target_selector,target_keyword';
@@ -41,13 +41,6 @@ export default function MyTracker() {
       });
   }, [session])
 
-  const handleUnsubscribe = async (trackerId: string): Promise<boolean> => {
-    if (!session) return false;
-    const { ok } = await unsubscribeTracker(session, trackerId);
-    if (ok) setSubscribedTrackers((prev) => prev.filter((t) => t.id !== trackerId));
-    return ok;
-  };
-
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>
@@ -63,8 +56,6 @@ export default function MyTracker() {
                 tracker={t}
                 isOwner
                 isSubscribed
-                onToggleSubscribe={async () => true}
-                // onDelete={() => handleDelete(t.id)}
               />
             ))}
           </div>
@@ -80,7 +71,6 @@ export default function MyTracker() {
                 tracker={t}
                 isOwner={false}
                 isSubscribed
-                onToggleSubscribe={() => handleUnsubscribe(t.id)}
               />
             ))}
           </div>

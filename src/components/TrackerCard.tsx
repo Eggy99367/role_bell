@@ -1,4 +1,4 @@
-import { deleteTracker } from '@/utils/supabase';
+import { deleteTracker, subscribeTracker, unsubscribeTracker } from '@/utils/supabase';
 import { Session } from "@supabase/supabase-js"
 import { useEffect, useState } from 'react';
 
@@ -72,16 +72,12 @@ export default function TrackerCard({
   tracker,
   isOwner,
   isSubscribed,
-  onToggleSubscribe,
-  // onDelete,
   showPublicBadge = true,
 }: {
   session: Session | null;
   tracker: Tracker;
   isOwner: boolean;
   isSubscribed: boolean;
-  onToggleSubscribe: () => Promise<boolean>;
-  // onDelete?: () => Promise<void>;
   showPublicBadge?: boolean;
 }) {
   const [deleted, setDeleted] = useState(false);
@@ -94,12 +90,19 @@ export default function TrackerCard({
   }, [tracker.subscriber_count]);
 
   const handleToggle = async () => {
+    if (!session) return
     const delta = subscribed ? -1 : 1;
     setSubscriberCount((count) => count + delta);
     setLoading(true);
-    const ok = await onToggleSubscribe();
+
+    const { ok } = subscribed
+      ? await unsubscribeTracker(session, tracker.id)
+      : await subscribeTracker(session, tracker.id);
+    
+    if (ok) setSubscribed(!subscribed);
+    else setSubscriberCount((count) => count - delta);
+
     setLoading(false);
-    if (!ok) setSubscriberCount((count) => count - delta);
   };
 
   const handleDelete = async () => {
@@ -143,7 +146,7 @@ export default function TrackerCard({
           </div>
           {showPublicBadge && isOwner && tracker.is_public && <PublicBadge />}
         </div>
-  
+
         <a
           href={tracker.target_url}
           target="_blank"
@@ -153,7 +156,7 @@ export default function TrackerCard({
           View posting
           <ExternalLinkIcon />
         </a>
-  
+
         <div className="mt-auto flex items-center gap-3">
           {isOwner
             ? !tracker.is_public && (
@@ -176,7 +179,7 @@ export default function TrackerCard({
                 {loading ? '...' : subscribed ? 'Unsubscribe' : 'Subscribe'}
               </button>
             )}
-  
+
           {tracker.is_public && (
             <span
               className="ml-auto flex items-center gap-1 text-sm text-[#9a8fb8]"
@@ -187,7 +190,7 @@ export default function TrackerCard({
             </span>
           )}
         </div>
-  
+
         <div
           className={`-mx-5 -mb-5 flex h-7 items-center justify-center gap-1.5 rounded-b-xl text-xs font-medium text-white ${statusStripClass(tracker.status)}`}
         >

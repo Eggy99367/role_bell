@@ -39,23 +39,6 @@ export default function Trending() {
       });
   }, [session])
 
-  const handleToggleSubscribe = async (trackerId: string): Promise<boolean> => {
-    if (!session) return false;
-    if (subscribedIds.has(trackerId)) {
-      const { ok } = await unsubscribeTracker(session, trackerId);
-      if (ok) setSubscribedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(trackerId);
-        return next;
-      });
-      return ok;
-    } else {
-      const { ok } = await subscribeTracker(session, trackerId);
-      if (ok) setSubscribedIds((prev) => new Set(prev).add(trackerId));
-      return ok;
-    }
-  };
-
   return (
     <RequireAuth>
       <div className='flex flex-col gap-10'>

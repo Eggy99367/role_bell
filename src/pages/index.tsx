@@ -1,7 +1,5 @@
-import { type Tracker } from '@/components/TrackerCard';
 import TrendingList from '@/components/TrendingList';
 
-import { useState } from 'react';
 import { Link } from 'react-router-dom'
 
 const FEATURES = [
@@ -11,8 +9,6 @@ const FEATURES = [
 ]
 
 export default function Home() {
-    const [trending, setTrending] = useState<Tracker[]>([]);
-  
   return (
     <div className='flex-1 flex flex-col items-center justify-center gap-14 text-center py-10'>
       <div className='relative flex flex-col items-center gap-6 max-w-2xl'>
