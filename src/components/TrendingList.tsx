@@ -6,7 +6,7 @@ import TrackerCard, { type Tracker } from '@/components/TrackerCard';
 const TRACKER_FIELDS = 'id,company,title,target_url,status,creator_id,is_public,last_checked_at,created_at,target_selector,target_keyword';
 
 export default function TrendingList() {
-  const [filterData, setFilterData] = useState({count: 50, status: "ALL"});
+  const [filterData, setFilterData] = useState({count: 50, status: "ALL", days: 90});
 
   const [trending, setTrending] = useState<Tracker[]>([]);
   const [subscribedIds, setSubscribedIds] = useState<Set<string>>(new Set());
@@ -17,10 +17,12 @@ export default function TrendingList() {
   }
 
   useEffect(() => {
+    const cutoff = new Date(Date.now() - Number(filterData.days) * 86400000).toISOString();
     let query = supabase
       .from('trackers')
       .select(TRACKER_FIELDS)
-      .eq('is_public', true);
+      .eq('is_public', true)
+      .or(`and(status.eq.MATCHED,last_checked_at.gte.${cutoff}),and(status.neq.MATCHED,created_at.gte.${cutoff})`);
     if (filterData.status !== 'ALL') query = query.eq('status', filterData.status);
     query
       .limit(filterData.count)
@@ -54,6 +56,13 @@ export default function TrendingList() {
           <option value={"10"}>Top 10</option>
           <option value={"50"}>Top 50</option>
           <option value={"100"}>Top 100</option>
+        </select>
+        <select name="days" id="trending-days-selector" onChange={handleFilterChange} value={filterData.days}>
+          <option value={"5"}>5 days</option>
+          <option value={"10"}>10 days</option>
+          <option value={"30"}>30 days</option>
+          <option value={"90"}>90 days</option>
+          <option value={"180"}>180 days</option>
         </select>
         <select name="status" id="trending-count-selector" onChange={handleFilterChange} value={filterData.status}>
           <option value={"ALL"}>All</option>
