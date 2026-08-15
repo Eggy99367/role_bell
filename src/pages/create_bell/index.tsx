@@ -19,28 +19,31 @@ NOT supported:
 Tip: to detect "more than 6 items", use
 ul.my-list > li:nth-child(7)`;
 
-const DEFAULT_DATA = {
-  loading: false,
-  verified: false,
-  failed: false,
-  fetchResult: "",
-  conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-  formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
-};
-
 // const DEFAULT_DATA = {
 //   loading: false,
 //   verified: false,
 //   failed: false,
+//   error: "",
 //   fetchResult: "",
 //   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-//   formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
+//   formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
 // };
+
+const DEFAULT_DATA = {
+  loading: false,
+  verified: false,
+  failed: false,
+  error: "",
+  fetchResult: "",
+  conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
+  formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
+};
 
 export default function CreateBell() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(DEFAULT_DATA.loading);
   const [verified, setVerified] = useState(DEFAULT_DATA.verified);
+  const [error, setError] = useState(DEFAULT_DATA.error);
   const [message, setMessage] = useState("");
   const [failed, setFailed] = useState(DEFAULT_DATA.failed);
   const [fetchResult, setFetchResult] = useState(DEFAULT_DATA.fetchResult);
@@ -64,8 +67,19 @@ export default function CreateBell() {
   };
 
 
+  const isWorkerSupported = (selector: string): boolean => {
+    const SUPPORTED_PSEUDOS = ['nth-child', 'first-child', 'nth-of-type', 'first-of-type', 'not'];
+    const stripped = selector
+      .replace(/\[[^\]]*\]/g, '')
+      .replace(/\(\s*[-\d]*n?\s*([+-]\s*\d+)?\s*\)/g, '()');
+    if (/[+~]/.test(stripped)) return false;
+    const pseudos = stripped.match(/::?[a-z-]+/gi) ?? [];
+    return pseudos.every(p => SUPPORTED_PSEUDOS.includes(p.replace(/^::?/, '').toLowerCase()));
+  };
+
   const evaluateCondition = (condition: { type: 'text' | 'css', value: string }): 'found' | 'notfound' | 'error' => {
     try {
+      if (condition.type === 'css' && !isWorkerSupported(condition.value)) return 'error';
       const matched = condition.type === 'text'
         ? fetchResult.includes(condition.value)
         : !!new DOMParser().parseFromString(fetchResult, 'text/html').querySelector(condition.value);
@@ -80,9 +94,12 @@ export default function CreateBell() {
   };
 
   const testAllConditions = () => {
-    setTestResults(Object.fromEntries(
+    setTestResults({});
+    const results = Object.fromEntries(
       conditions.filter(c => c.value.trim()).map(c => [c.id, evaluateCondition(c)])
-    ));
+    );
+    setTestResults(results);
+    return Object.values(results).every(r => r === "notfound");
   }
 
   const removeCondition = (id: string) => {
@@ -110,9 +127,15 @@ export default function CreateBell() {
 
   const handleCreate = async () => {
     if (!session) return;
+    setError("")
+    if (!testAllConditions()) {
+      setError("Some conditions are already met or invalid. Check the results on each condition card above.")
+      return
+    }
     const { ok, error, id } = await createTracker(session, conditions, formData);
     if (!ok) {
       console.error("Failed to create bell: ", error);
+      setError("Failed to create bell. Please try again.")
       return;
     }
     setMessage("Bell Created Successfully!");
@@ -216,7 +239,7 @@ export default function CreateBell() {
                 )}
                 {testResults[condition.id] === 'found' && <p className='text-amber-400'>Condition already met.</p>}
                 {testResults[condition.id] === 'notfound' && <p className='text-emerald-400'>Condition not yet met.</p>}
-                {testResults[condition.id] === 'error' && <p className='text-red-400'>Invalid CSS selector.</p>}
+                {testResults[condition.id] === 'error' && <p className='text-red-400'>Invalid or unsupported CSS selector (see ? for supported syntax).</p>}
               </div>
             ))}
 
@@ -230,9 +253,10 @@ export default function CreateBell() {
             />
             Make Public <b className='text-[#f1eefa]'>PUBLIC BELL CAN NOT BE DELETED!</b>
           </label>
-          <button disabled={formData.company.trim() === "" || formData.jobTitle.trim() === "" || !conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
+          <button disabled={formData.company.trim() === "" || formData.jobTitle.trim() === "" || !conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Test Conditions and Create</button>
         </div>}
-        <p className='text-emerald-400'>{message}</p>
+        {message && <p className='text-emerald-400'>{message}</p>}
+        <p className='text-red-700'>{error}</p>
       </div>
     </RequireAuth>
   )
