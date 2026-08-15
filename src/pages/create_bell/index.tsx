@@ -19,16 +19,25 @@ NOT supported:
 Tip: to detect "more than 6 items", use
 ul.my-list > li:nth-child(7)`;
 
+const DEFAULT_DATA = {
+  loading: false,
+  verified: false,
+  failed: false,
+  fetchResult: "",
+  conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
+  formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
+};
+
 export default function CreateBell() {
   const { session } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(DEFAULT_DATA.loading);
+  const [verified, setVerified] = useState(DEFAULT_DATA.verified);
   const [message, setMessage] = useState("");
-  const [failed, setFailed] = useState(false);
-  const [fetchResult, setFetchResult] = useState("");
+  const [failed, setFailed] = useState(DEFAULT_DATA.failed);
+  const [fetchResult, setFetchResult] = useState(DEFAULT_DATA.fetchResult);
   const [isCopied, setIsCopied] = useState(false);
-  const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>([{id: crypto.randomUUID(), type: "text", value: ""}]);
-  const [formData, setFormData] = useState({ targetURL: "", company: "", jobTitle: "", isPublic: false });
+  const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>(DEFAULT_DATA.conditions);
+  const [formData, setFormData] = useState(DEFAULT_DATA.formData);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value, checked } = event.target;
@@ -75,35 +84,24 @@ export default function CreateBell() {
     }
     setMessage("Bell Created Successfully!");
     setTimeout(() => setMessage(""), 4000);
-    setLoading(false);
-    setVerified(false);
-    setFailed(false);
-    setFetchResult("");
-    setConditions([]);
-    setFormData({ targetURL: "", company: "", jobTitle: "", isPublic: false });
+    reset();
     if (id) triggerCheck(id);
+  }
+
+  const reset = () => {
+    setLoading(DEFAULT_DATA.loading);
+    setVerified(DEFAULT_DATA.verified);
+    setFailed(DEFAULT_DATA.failed);
+    setFetchResult(DEFAULT_DATA.fetchResult);
+    setConditions(DEFAULT_DATA.conditions);
+    setFormData(DEFAULT_DATA.formData);
   }
 
   return (
     <RequireAuth>
-      <div className='flex flex-col gap-3 max-w-xl'>
+      <div className='flex flex-col gap-3 w-full'>
         <h1 className='text-[#f1eefa]'>Create A Bell</h1>
-        <input
-          type="text"
-          name="company"
-          placeholder="enter company"
-          value={formData.company}
-          onChange={handleChange}
-          disabled={loading || verified}
-        />
-        <input
-          type="text"
-          name="jobTitle"
-          placeholder="enter job title"
-          value={formData.jobTitle}
-          onChange={handleChange}
-          disabled={loading || verified}
-        />
+
         <input
           type="url"
           name="targetURL"
@@ -115,11 +113,31 @@ export default function CreateBell() {
           }}
           disabled={loading || verified}
         />
-        <button onClick={handleVerify} disabled={loading || verified || !formData.company.trim() || !formData.jobTitle.trim() || !formData.targetURL.trim()}>Verify URL</button>
+        <button onClick={handleVerify} disabled={loading || verified || !formData.targetURL.trim()}>Verify URL</button>
         {failed && <p className='text-red-400'>Fetch failed! The URL may be incorrect or the webpage could not be retrieved.</p>}
         {verified && <div className='flex flex-col gap-3'>
           <p className='text-[#9a8fb8]'>Fetch successful! Please copy the fetched results into an <a href="https://html.onlineviewer.net/" target='blank'>Online HTML Viewer</a> to double-check that the output is correct.</p>
-          <button onClick={handleCopy} disabled={!verified}>{isCopied ? "Copied" : "Copy Fetch Result"}</button>
+          <div className='w-full flex gap-2'>
+            <button className="flex-1" onClick={handleCopy} disabled={!verified}>{isCopied ? "Copied" : "Copy Fetch Result"}</button>
+            <button className='w-fit bg-gray-500 hover:!bg-gray-600' onClick={reset}>RESET</button>
+          </div>
+          
+          <h2 className='text-[#f1eefa]'>Bell Information</h2>
+          <input
+            type="text"
+            name="company"
+            placeholder="enter company"
+            value={formData.company}
+            onChange={handleChange}
+          />
+          <input
+            type="text"
+            name="jobTitle"
+            placeholder="enter job title"
+            value={formData.jobTitle}
+            onChange={handleChange}
+          />
+          
           <h2 className='text-[#f1eefa]'>Tracked Conditions</h2>
           <p className='text-[#9a8fb8]'>You'll be notified if any condition is met.</p>
           <div className='flex gap-3'>
@@ -171,7 +189,7 @@ export default function CreateBell() {
             />
             Make Public <b className='text-[#f1eefa]'>PUBLIC BELL CAN NOT BE DELETED!</b>
           </label>
-          <button disabled={!conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
+          <button disabled={formData.company.trim() === "" || formData.jobTitle.trim() === "" || !conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Create</button>
         </div>}
         <p className='text-emerald-400'>{message}</p>
       </div>
