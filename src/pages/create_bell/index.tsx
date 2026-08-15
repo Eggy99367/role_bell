@@ -169,7 +169,9 @@ export default function CreateBell() {
       <div className='flex flex-col gap-3 w-full'>
         <h1 className='text-[#f1eefa]'>Create A Bell</h1>
 
+        <label htmlFor="targetURL" className='text-[#9a8fb8]'>Target URL</label>
         <input
+          id="targetURL"
           type="url"
           name="targetURL"
           placeholder="enter target page's url"
@@ -191,14 +193,18 @@ export default function CreateBell() {
           </div>
 
           <h2 className='text-[#f1eefa]'>Bell Information</h2>
+          <label htmlFor="company" className='text-[#9a8fb8]'>Company</label>
           <input
+            id="company"
             type="text"
             name="company"
             placeholder="enter company (required)"
             value={formData.company}
             onChange={handleChange}
           />
+          <label htmlFor="jobTitle" className='text-[#9a8fb8]'>Job Title</label>
           <input
+            id="jobTitle"
             type="text"
             name="jobTitle"
             placeholder="enter job title (required)"
