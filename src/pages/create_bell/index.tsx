@@ -19,16 +19,6 @@ NOT supported:
 Tip: to detect "more than 6 items", use
 ul.my-list > li:nth-child(7)`;
 
-// const DEFAULT_DATA = {
-//   loading: false,
-//   verified: false,
-//   failed: false,
-//   error: "",
-//   fetchResult: "",
-//   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-//   formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
-// };
-
 const DEFAULT_DATA = {
   loading: false,
   verified: false,
@@ -36,7 +26,7 @@ const DEFAULT_DATA = {
   error: "",
   fetchResult: "",
   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-  formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
+  formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
 };
 
 export default function CreateBell() {
@@ -115,6 +105,21 @@ export default function CreateBell() {
     setLoading(false);
   }
 
+  const handlePreview = () => {
+    const contentUrl = URL.createObjectURL(new Blob([fetchResult], { type: 'text/html' }));
+    const wrapper = `<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>RoleBell - Fetched Preview</title></head>
+<body style="margin:0;height:100vh;display:flex;flex-direction:column;background:#241f31;">
+  <div style="padding:14px 20px;background:#6b52a6;color:#f1eefa;font-family:Arial,sans-serif;font-size:15px;">
+    This is a preview of the page content RoleBell fetched. Use it to double-check that the output is correct.
+  </div>
+  <iframe src="${contentUrl}" sandbox="allow-same-origin" style="flex:1;margin:16px;border:12px solid #6b52a6;border-radius:12px;background:#fff;"></iframe>
+</body>
+</html>`;
+    window.open(URL.createObjectURL(new Blob([wrapper], { type: 'text/html' })), '_blank');
+  };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(fetchResult);
@@ -178,12 +183,13 @@ export default function CreateBell() {
         <button onClick={handleVerify} disabled={loading || verified || !formData.targetURL.trim()}>Verify URL</button>
         {failed && <p className='text-red-400'>Fetch failed! The URL may be incorrect or the webpage could not be retrieved.</p>}
         {verified && <div className='flex flex-col gap-3'>
-          <p className='text-[#9a8fb8]'>Fetch successful! Please copy the fetched results into an <a href="https://html.onlineviewer.net/" target='blank'>Online HTML Viewer</a> to double-check that the output is correct.</p>
+          <p className='text-[#9a8fb8]'>Fetch successful! Preview the fetched result to double-check that the output is correct.</p>
           <div className='w-full flex gap-2'>
+            <button className="flex-1" onClick={handlePreview} disabled={!verified}>Preview Fetch Result</button>
             <button className="flex-1" onClick={handleCopy} disabled={!verified}>{isCopied ? "Copied" : "Copy Fetch Result"}</button>
             <button className='w-fit bg-gray-500 hover:!bg-gray-600' onClick={reset}>RESET</button>
           </div>
-          
+
           <h2 className='text-[#f1eefa]'>Bell Information</h2>
           <input
             type="text"
@@ -199,7 +205,7 @@ export default function CreateBell() {
             value={formData.jobTitle}
             onChange={handleChange}
           />
-          
+
           <h2 className='text-[#f1eefa]'>Tracked Conditions</h2>
           <p className='text-[#9a8fb8]'>You'll be notified if any condition is met.</p>
           <div className='flex gap-3'>
