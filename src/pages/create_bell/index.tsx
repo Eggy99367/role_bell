@@ -148,6 +148,7 @@ export default function CreateBell() {
     setLoading(DEFAULT_DATA.loading);
     setVerified(DEFAULT_DATA.verified);
     setFailed(DEFAULT_DATA.failed);
+    setError(DEFAULT_DATA.error);
     setFetchResult(DEFAULT_DATA.fetchResult);
     setConditions(DEFAULT_DATA.conditions);
     setTestResults({});
@@ -253,7 +254,7 @@ export default function CreateBell() {
             />
             Make Public <b className='text-[#f1eefa]'>PUBLIC BELL CAN NOT BE DELETED!</b>
           </label>
-          <button disabled={formData.company.trim() === "" || formData.jobTitle.trim() === "" || !conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Test Conditions and Create</button>
+          <button className='bg-emerald-600 hover:!bg-emerald-700' disabled={formData.company.trim() === "" || formData.jobTitle.trim() === "" || !conditions.some(c => c.value.trim() !== '')} onClick={handleCreate}>Test Conditions and Create</button>
         </div>}
         {message && <p className='text-emerald-400'>{message}</p>}
         <p className='text-red-700'>{error}</p>
