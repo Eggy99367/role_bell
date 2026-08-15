@@ -19,13 +19,22 @@ NOT supported:
 Tip: to detect "more than 6 items", use
 ul.my-list > li:nth-child(7)`;
 
+// const DEFAULT_DATA = {
+//   loading: false,
+//   verified: false,
+//   failed: false,
+//   fetchResult: "",
+//   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
+//   formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
+// };
+
 const DEFAULT_DATA = {
   loading: false,
   verified: false,
   failed: false,
   fetchResult: "",
   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-  formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
+  formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
 };
 
 export default function CreateBell() {
@@ -37,6 +46,7 @@ export default function CreateBell() {
   const [fetchResult, setFetchResult] = useState(DEFAULT_DATA.fetchResult);
   const [isCopied, setIsCopied] = useState(false);
   const [conditions, setConditions] = useState<{ id: string, type: 'text' | 'css', value: string }[]>(DEFAULT_DATA.conditions);
+  const [testResults, setTestResults] = useState<Record<string, 'found' | 'notfound' | 'error'>>({});
   const [formData, setFormData] = useState(DEFAULT_DATA.formData);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +60,21 @@ export default function CreateBell() {
 
   const updateCondition = (id: string, value: string) => {
     setConditions(prev => prev.map(c => c.id === id ? { ...c, value } : c));
+    setTestResults(prev => { const { [id]: _, ...rest } = prev; return rest; });
+  };
+
+
+  const testCondition = (condition: { id: string, type: 'text' | 'css', value: string }) => {
+    let result: 'found' | 'notfound' | 'error';
+    try {
+      const matched = condition.type === 'text'
+        ? fetchResult.includes(condition.value)
+        : !!new DOMParser().parseFromString(fetchResult, 'text/html').querySelector(condition.value);
+      result = matched ? 'found' : 'notfound';
+    } catch {
+      result = 'error';
+    }
+    setTestResults(prev => ({ ...prev, [condition.id]: result }));
   };
 
   const removeCondition = (id: string) => {
@@ -94,6 +119,7 @@ export default function CreateBell() {
     setFailed(DEFAULT_DATA.failed);
     setFetchResult(DEFAULT_DATA.fetchResult);
     setConditions(DEFAULT_DATA.conditions);
+    setTestResults({});
     setFormData(DEFAULT_DATA.formData);
   }
 
@@ -150,7 +176,7 @@ export default function CreateBell() {
               <div key={condition.id} className='flex flex-col gap-2 border border-line bg-surface p-3 rounded-xl'>
                 <div className='flex justify-between items-center'>
                   <h3 className='text-[#f1eefa] flex items-center gap-2'>
-                    {condition.type === 'text' ? 'Track Text' : 'Track CSS Selecter'}
+                    {condition.type === 'text' ? 'Text' : 'CSS Selecter'}
                     {condition.type === 'css' && (
                       <span className='relative group' tabIndex={0}>
                         <span className='text-xs text-[#9a8fb8] border border-line rounded-full w-4 h-4 inline-flex items-center justify-center cursor-help'>?</span>
@@ -160,7 +186,10 @@ export default function CreateBell() {
                       </span>
                     )}
                   </h3>
-                  <button onClick={() => removeCondition(condition.id)} className='border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50'>Delete</button>
+                  <div className='flex items-center gap-2'>
+                    <button onClick={() => testCondition(condition)} disabled={!condition.value.trim()}>Test</button>
+                    <button onClick={() => removeCondition(condition.id)} className='border border-red-600 bg-transparent text-red-400 hover:bg-red-950/50'>Delete</button>
+                  </div>
                 </div>
                 {condition.type === 'text' ? (
                   <input
@@ -176,6 +205,9 @@ export default function CreateBell() {
                     onChange={(event) => updateCondition(condition.id, event.target.value)}
                   />
                 )}
+                {testResults[condition.id] === 'found' && <p className='text-amber-400'>Condition already met on the verified page.</p>}
+                {testResults[condition.id] === 'notfound' && <p className='text-emerald-400'>Condition not yet met on the verified page.</p>}
+                {testResults[condition.id] === 'error' && <p className='text-red-400'>Invalid CSS selector.</p>}
               </div>
             ))}
 
