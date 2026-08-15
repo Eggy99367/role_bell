@@ -118,18 +118,19 @@ async function markNotified(id: string, env: Env) {
 	});
 }
 
-async function logCheck(trackerId: string, httpStatus: number, matched: boolean, env: Env) {
-	const res = await fetch(`${env.SUPABASE_URL}/rest/v1/check_logs?select=checked_at`, {
+async function logCheck(trackerId: string, message: string, env: Env) {
+	await fetch(`${env.SUPABASE_URL}/rest/v1/check_logs`, {
 		method: 'POST',
-		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json', Prefer: 'return=representation' },
-		body: JSON.stringify({ tracker_id: trackerId, http_status: httpStatus, match: matched }),
+		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json' },
+		body: JSON.stringify({ tracker_id: trackerId, message }),
 	});
-	if (!res.ok) return;
-	const [row]: { checked_at: string }[] = await res.json();
+}
+
+async function touchLastChecked(trackerId: string, env: Env) {
 	await fetch(`${env.SUPABASE_URL}/rest/v1/trackers?id=eq.${trackerId}`, {
 		method: 'PATCH',
 		headers: { ...supabaseHeaders(env), 'Content-Type': 'application/json' },
-		body: JSON.stringify({ last_checked_at: row.checked_at }),
+		body: JSON.stringify({ last_checked_at: new Date().toISOString() }),
 	});
 }
 
@@ -154,15 +155,18 @@ export async function conditionsMet(html: string, keywords: string[], selectors:
 async function checkTracker(tracker: Tracker, env: Env) {
 	try {
 		const res = await fetch(tracker.target_url);
+		if (!res.ok) throw new Error(`fetch target failed: ${res.status}`);
 		const html = await res.text();
 		const matched = await conditionsMet(html, tracker.target_keyword ?? [], tracker.target_selector ?? []);
-		await logCheck(tracker.id, res.status, matched, env);
 		if (matched) {
+			await logCheck(tracker.id, 'matched', env);
 			await markMatched(tracker.id, env);
 			await sendNotificationMails(tracker, env);
 		}
+		await touchLastChecked(tracker.id, env);
 	} catch (err) {
 		console.error(`tracker ${tracker.id} check failed`, err);
+		await logCheck(tracker.id, String(err), env);
 	}
 }
 
