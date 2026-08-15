@@ -127,21 +127,25 @@ export default function CreateBell() {
 
   const handleCreate = async () => {
     if (!session) return;
-    setError("")
     if (!testAllConditions()) {
-      setError("Some conditions are already met or invalid. Check the results on each condition card above.")
+      setErrorMessage("Some conditions are already met or invalid. Check the results on each condition card above.")
       return
     }
     const { ok, error, id } = await createTracker(session, conditions, formData);
     if (!ok) {
       console.error("Failed to create bell: ", error);
-      setError("Failed to create bell. Please try again.")
+      setErrorMessage("Failed to create bell. Please try again.")
       return;
     }
     setMessage("Bell Created Successfully!");
     setTimeout(() => setMessage(""), 4000);
     reset();
     if (id) triggerCheck(id);
+  }
+
+  const setErrorMessage = (errorMessage: string) => {
+    setError(errorMessage);
+    setTimeout(() => setError(""), 5000);
   }
 
   const reset = () => {
@@ -184,14 +188,14 @@ export default function CreateBell() {
           <input
             type="text"
             name="company"
-            placeholder="enter company"
+            placeholder="enter company (required)"
             value={formData.company}
             onChange={handleChange}
           />
           <input
             type="text"
             name="jobTitle"
-            placeholder="enter job title"
+            placeholder="enter job title (required)"
             value={formData.jobTitle}
             onChange={handleChange}
           />
