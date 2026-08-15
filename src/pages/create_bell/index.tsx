@@ -19,23 +19,23 @@ NOT supported:
 Tip: to detect "more than 6 items", use
 ul.my-list > li:nth-child(7)`;
 
-// const DEFAULT_DATA = {
-//   loading: false,
-//   verified: false,
-//   failed: false,
-//   fetchResult: "",
-//   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-//   formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
-// };
-
 const DEFAULT_DATA = {
   loading: false,
   verified: false,
   failed: false,
   fetchResult: "",
   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
-  formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
+  formData: { targetURL: "", company: "", jobTitle: "", isPublic: false }
 };
+
+// const DEFAULT_DATA = {
+//   loading: false,
+//   verified: false,
+//   failed: false,
+//   fetchResult: "",
+//   conditions: [{id: crypto.randomUUID(), type: "text" as const, value: ""}],
+//   formData: { targetURL: "https://www.google.com/about/careers/applications/jobs/results/103999189100176070-new-business-sales-account-strategist-onboarding-google-customer-solutions", company: "", jobTitle: "", isPublic: false }
+// };
 
 export default function CreateBell() {
   const { session } = useAuth();
@@ -64,18 +64,26 @@ export default function CreateBell() {
   };
 
 
-  const testCondition = (condition: { id: string, type: 'text' | 'css', value: string }) => {
-    let result: 'found' | 'notfound' | 'error';
+  const evaluateCondition = (condition: { type: 'text' | 'css', value: string }): 'found' | 'notfound' | 'error' => {
     try {
       const matched = condition.type === 'text'
         ? fetchResult.includes(condition.value)
         : !!new DOMParser().parseFromString(fetchResult, 'text/html').querySelector(condition.value);
-      result = matched ? 'found' : 'notfound';
+      return matched ? 'found' : 'notfound';
     } catch {
-      result = 'error';
+      return 'error';
     }
-    setTestResults(prev => ({ ...prev, [condition.id]: result }));
   };
+
+  const testCondition = (condition: { id: string, type: 'text' | 'css', value: string }) => {
+    setTestResults(prev => ({ ...prev, [condition.id]: evaluateCondition(condition) }));
+  };
+
+  const testAllConditions = () => {
+    setTestResults(Object.fromEntries(
+      conditions.filter(c => c.value.trim()).map(c => [c.id, evaluateCondition(c)])
+    ));
+  }
 
   const removeCondition = (id: string) => {
     setConditions(prev => prev.filter(c => c.id !== id));
@@ -169,6 +177,7 @@ export default function CreateBell() {
           <div className='flex gap-3'>
             <button onClick={() => addCondition('text')}>Add Text</button>
             <button onClick={() => addCondition('css')}>Add CSS Selecter</button>
+            <button onClick={testAllConditions} disabled={!conditions.some(c => c.value.trim())} className='bg-gray-500 hover:!bg-gray-600'>Test All</button>
           </div>
           {[...conditions]
             .sort((a, b) => (a.type === b.type ? 0 : a.type === 'text' ? -1 : 1))
@@ -205,8 +214,8 @@ export default function CreateBell() {
                     onChange={(event) => updateCondition(condition.id, event.target.value)}
                   />
                 )}
-                {testResults[condition.id] === 'found' && <p className='text-amber-400'>Condition already met on the verified page.</p>}
-                {testResults[condition.id] === 'notfound' && <p className='text-emerald-400'>Condition not yet met on the verified page.</p>}
+                {testResults[condition.id] === 'found' && <p className='text-amber-400'>Condition already met.</p>}
+                {testResults[condition.id] === 'notfound' && <p className='text-emerald-400'>Condition not yet met.</p>}
                 {testResults[condition.id] === 'error' && <p className='text-red-400'>Invalid CSS selector.</p>}
               </div>
             ))}
